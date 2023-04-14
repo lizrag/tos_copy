@@ -12,22 +12,23 @@ from watchdog.events import (
     EVENT_TYPE_MOVED
 )
 
-origin = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/"
-destination = "C:/Users/laura.rangelroman/Documents/folder_sync_project/"
+origin = "C:/Users/laura/OneDrive/Documents/prueba/repository"
+destination = "C:/Users/laura/OneDrive/Documents/prueba"
 
 class MyHandler(FileSystemEventHandler):
     def on_created(self, event):
         or_path = event.src_path.replace("\\", "/")
         #print(or_path)
         server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
+        print(server_name)
         file_name = os.path.basename(or_path)
         print(file_name)
-        dest_file_path = os.path.join(destination,server_name + '/')
-        #print(dest_file_path)
-        # extension = ('.var', '.fil', '.tdr')
-        # if file_name.endswith(extension):
-        #     shutil.copyfile(or_path, dest_file_path)
-        #     print("copy")
+        dest_file_path = os.path.join(destination,server_name).replace("\\", "/")
+        print(dest_file_path)
+        extension = ('.var', '.fil', '.tdr', '.txt')
+        if file_name.endswith(extension):
+            shutil.copy(or_path, dest_file_path)
+            print("copy")
 
     
     # def on_modified(self, event):
