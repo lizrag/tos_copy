@@ -1,9 +1,8 @@
 import os
 import logging
 import time
-from utils import *
+import shutil
 from watchdog.observers import Observer
-from watchdog.utils.dirsnapshot import DirectorySnapshot, DirectorySnapshotDiff
 from watchdog.events import FileSystemEventHandler, LoggingEventHandler
 from watchdog.events import (
     EVENT_TYPE_CREATED,
@@ -12,35 +11,72 @@ from watchdog.events import (
     EVENT_TYPE_MOVED
 )
 
-origin = "C:/Users/laura/OneDrive/Documents/prueba/repository"
-destination = "C:/Users/laura/OneDrive/Documents/prueba"
+origin = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
+destination = "C:/Users/laura.rangelroman/Documents/folder_sync_project"
 
 class MyHandler(FileSystemEventHandler):
     def on_created(self, event):
+        # Replace backslashes with forward slashes in the source path.
         or_path = event.src_path.replace("\\", "/")
-        #print(or_path)
+        print(or_path)
+        # Extract the server name from the path
         server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
-        print(server_name)
+        #print(server_name)
+        # Extract the file name from the path
         file_name = os.path.basename(or_path)
-        print(file_name)
-        dest_file_path = os.path.join(destination,server_name).replace("\\", "/")
+        #print(file_name)
+        # Extract the TOS dir
+        dir_tos = os.path.basename(os.path.dirname(os.path.dirname(or_path)))
+        print(dir_tos)
+        # Extract the subdir of TOS
+        subdir = os.path.basename(os.path.dirname(or_path))
+        print(subdir)
+        # Create a path to the target destination directory
+        dest_file_path = os.path.join(destination,server_name, dir_tos, subdir).replace("\\", "/")
         print(dest_file_path)
+        
+        # Creates the TOS folder if does not exist
+        subdir_parent_dir = os.path.join(destination, server_name, dir_tos).replace("\\", "/")
+        if not os.path.exists(subdir_parent_dir):
+            os.makedirs(subdir_parent_dir, exist_ok=True)
+
+        # Creates the subdir folder if it doesn't exist
+        if not os.path.exists(dest_file_path):
+            os.makedirs(dest_file_path, exist_ok=True)
+
+        # If the file that triggered the event has a valid extension and not an extension that should be include, copy it to the target directory
         extension = ('.var', '.fil', '.tdr', '.txt')
-        if file_name.endswith(extension):
-            shutil.copy(or_path, dest_file_path)
+        ignore_extension = ('.log')
+        if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
+            shutil.copy2(or_path, os.path.join(dest_file_path, file_name))
+            logging.info(f"Copied {or_path} to {dest_file_path}")
             print("copy")
 
-    
-    # def on_modified(self, event):
-    #     if os.path.exists(path_a) and os.path.exists(path_b):
-    #         mtime_a = os.stat(path_a).st_mtime
-    #         mtime_b = os.stat(path_b).st_mtime
-    #     if mtime_a > mtime_b:
-    #         shutil.copy2(path_a, path_b)
-    #         print(f"The file {path_a} has been updated in {path_b}.")
-    #     elif mtime_b > mtime_a:
-    #         shutil.copy2(path_b, path_a)
-    #         print(f"The file {path_b} has been updated in {path_a}.")
+    def on_modified(self, event):
+        # Only process files, not directories.
+        if not event.is_directory:
+            or_path = event.src_path.replace("\\", "/")
+            # Extract the server name and the file name from the path.
+            server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
+            file_name = os.path.basename(or_path)
+            print(file_name)
+            # Create a path to the target directory and replace backslashes with forward slashes
+            dest_file_path = os.path.join(destination,server_name).replace("\\", "/")
+            extension = ('.var', '.fil', '.tdr', '.txt')
+            ignore_extension = ('.log')
+            if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
+                src_mtime = os.stat(or_path).st_mtime
+                dst_file_path = os.path.join(dest_file_path, file_name).replace("\\", "/")
+                # If the source file is newer, copy it to the destination directory and print a message.
+                if os.path.exists(or_path) and os.path.exists(dest_file_path):
+                        mtime_a = os.stat(or_path).st_mtime
+                        mtime_b = os.stat(dest_file_path).st_mtime
+                        # print(mtime_a)
+                        # print(mtime_b)
+                        shutil.copy2(or_path, dest_file_path)
+                        print(f"The file {or_path} has been updated in {dest_file_path}.")
+                        logging.info(f"File updated from {or_path} in {dest_file_path}")
+                    
 
     def on_deleted(self, event):
         or_path = event.src_path.replace("\\", "/")
@@ -49,10 +85,11 @@ class MyHandler(FileSystemEventHandler):
         server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
         print(server_name)
         dest_file_path = os.path.join(destination,server_name, filename).replace("\\", "/")
+        # If the target file exists, delete it and print a message.
         if(os.path.exists(dest_file_path)):
-                logging.info(f"Deleting {dest_file_path}")
+                logging.info(f"Deleted {dest_file_path}")
                 removed_file = os.remove(dest_file_path)
-        print("on_deleted", event.src_path)
+
 
 
 
