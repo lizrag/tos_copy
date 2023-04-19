@@ -27,22 +27,26 @@ class MyHandler(FileSystemEventHandler):
         #print(file_name)
         # Extract the TOS dir
         dir_tos = os.path.basename(os.path.dirname(os.path.dirname(or_path)))
-        print(dir_tos)
+        #print(dir_tos)
         # Extract the subdir of TOS
         subdir = os.path.basename(os.path.dirname(or_path))
-        print(subdir)
+        #print(subdir)
         # Create a path to the target destination directory
         dest_file_path = os.path.join(destination,server_name, dir_tos, subdir).replace("\\", "/")
-        print(dest_file_path)
+        #print(dest_file_path)
         
         # Creates the TOS folder if does not exist
         subdir_parent_dir = os.path.join(destination, server_name, dir_tos).replace("\\", "/")
         if not os.path.exists(subdir_parent_dir):
             os.makedirs(subdir_parent_dir, exist_ok=True)
+        else:
+            logging.error('The TOS folder could not be created')
 
         # Creates the subdir folder if it doesn't exist
         if not os.path.exists(dest_file_path):
             os.makedirs(dest_file_path, exist_ok=True)
+        else:
+            logging.error('The subdir could not be created')
 
         # If the file that triggered the event has a valid extension and not an extension that should be include, copy it to the target directory
         extension = ('.var', '.fil', '.tdr', '.txt')
@@ -51,6 +55,8 @@ class MyHandler(FileSystemEventHandler):
             shutil.copy2(or_path, os.path.join(dest_file_path, file_name))
             logging.info(f"Copied {or_path} to {dest_file_path}")
             print("copy")
+        else:
+            logging.error('The file could not be copied in {dest_file_path}')
 
     def on_modified(self, event):
         # Only process files, not directories.
@@ -76,7 +82,8 @@ class MyHandler(FileSystemEventHandler):
                         shutil.copy2(or_path, dest_file_path)
                         print(f"The file {or_path} has been updated in {dest_file_path}.")
                         logging.info(f"File updated from {or_path} in {dest_file_path}")
-                    
+            else:
+                logging.error('The file could not be updated in {dest_file_path}')
 
     def on_deleted(self, event):
         or_path = event.src_path.replace("\\", "/")
@@ -89,12 +96,14 @@ class MyHandler(FileSystemEventHandler):
         if(os.path.exists(dest_file_path)):
                 logging.info(f"Deleted {dest_file_path}")
                 removed_file = os.remove(dest_file_path)
+        else:
+            logging.error('The file could not be deleted in {dest_file_path}')
 
 
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,format="%(levelname)s | %(asctime)s | %(message)s")
+    logging.basicConfig(filename="sync.log",level=logging.INFO,format="%(levelname)s | %(asctime)s | %(message)s")
 
     path = os.path.abspath(origin)
     event_handler = MyHandler()
