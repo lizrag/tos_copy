@@ -1,40 +1,42 @@
-import os
 import shutil
+import os
 import pytest
-from main import MyHandler
+from main import *
+from watchdog.events import FileSystemEvent
+
+@pytest.fixture
+def handler():
+    return MyHandler()
+
+def test_on_created(handler, capsys):
+    # Create test file in source directory
+    test_file = os.path.join(origin, "test.txt")
+    with open(test_file, "w") as f:
+        f.write("test")
+
+    # Trigger on_created event
+    event = FileSystemEvent(test_file)
+    handler.on_created(event)
+
+    # Check if file was copied to destination
+    dest_file = os.path.join(destination, "repository", "Documents", "folder_sync_project", "test.txt")
+    assert os.path.exists(dest_file)
+
+    # Check if program outputs correct message
+    captured = capsys.readouterr()
+    expected_output = "Copied {} to {}\n".format(test_file, dest_file)
+    assert captured.out == expected_output
+
+
+# Define the paths for testing
 
 
 # Test Case 0: Sync the starting repo structure to the server
 # Expected Results: All directories and files in the initial structure should be copied to the server.
 
 
-
 # Test Case 1: Create a file
 # Expected Result: File is created on server, program outputs list of files that were created
-@pytest.fixture
-def my_handler_instance(tmpdir):
-    # Create a temporary folder to use as the destination folder
-    destination = str(tmpdir.mkdir("destination"))
-    return MyHandler()
-
-def test_create_file(my_handler_instance):
-    # Define the test file path
-    file_name = "test_file.txt"
-    test_file_path = os.path.join(my_handler_instance.destination, file_name)
-
-    # Call the on_created method to create the file
-    my_handler_instance.on_created(event=MockEvent(test_file_path))
-
-    # Check that the file was created
-    assert os.path.exists(test_file_path)
-
-    # Check that the program outputs the list of files that were created
-    assert my_handler_instance.list_files() == [file_name]
-
-class MockEvent:
-    def __init__(self, src_path):
-        self.src_path = src_path
-
 
 
 # Test Case 2: Modify a file
