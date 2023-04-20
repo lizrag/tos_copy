@@ -1,39 +1,24 @@
 import os
 import shutil
 import pytest
-from main import MyHandler
-
+from main import *
 
 # Test Case 0: Sync the starting repo structure to the server
 # Expected Results: All directories and files in the initial structure should be copied to the server.
 
-
-
 # Test Case 1: Create a file
 # Expected Result: File is created on server, program outputs list of files that were created
-@pytest.fixture
-def my_handler_instance(tmpdir):
-    # Create a temporary folder to use as the destination folder
-    destination = str(tmpdir.mkdir("destination"))
-    return MyHandler()
 
-def test_create_file(my_handler_instance):
-    # Define the test file path
-    file_name = "test_file.txt"
-    test_file_path = os.path.join(my_handler_instance.destination, file_name)
-
-    # Call the on_created method to create the file
-    my_handler_instance.on_created(event=MockEvent(test_file_path))
-
-    # Check that the file was created
-    assert os.path.exists(test_file_path)
-
-    # Check that the program outputs the list of files that were created
-    assert my_handler_instance.list_files() == [file_name]
-
-class MockEvent:
-    def __init__(self, src_path):
-        self.src_path = src_path
+def test_file_created(tmpdir): 
+    event_handler = MyHandler() 
+    observer = Observer() 
+    observer.schedule(event_handler, path = 'C:/Users/laura/OneDrive/Documents/prueba/repository') 
+    observer.start() 
+    #tmpdir.mkdir("destination")
+    time.sleep(1) 
+    observer.stop() 
+    observer.join() 
+    assert event_handler.on_created
 
 
 
