@@ -1,26 +1,61 @@
-import os
 import shutil
+import os
 import pytest
+import tempfile
 from main import *
+from watchdog.events import FileSystemEvent
+
+# @pytest.fixture
+# def handler():
+#     return MyHandler()
+
+# def test_on_created(handler, capsys):
+#     # Create test file in source directory
+#     test_file = os.path.join(origin, "test.txt")
+#     with open(test_file, "w") as f:
+#         f.write("test")
+
+#     # Trigger on_created event
+#     event = FileSystemEvent(test_file)
+#     handler.on_created(event)
+
+#     # Check if file was copied to destination
+#     dest_file = os.path.join(destination, "repository", "Documents", "folder_sync_project", "test.txt")
+#     assert os.path.exists(dest_file)
+
+#     # Check if program outputs correct message
+#     captured = capsys.readouterr()
+#     expected_output = "Copied {} to {}\n".format(test_file, dest_file)
+#     assert captured.out == expected_output
+
+
+# Define the paths for testing
+
 
 # Test Case 0: Sync the starting repo structure to the server
 # Expected Results: All directories and files in the initial structure should be copied to the server.
 
+
 # Test Case 1: Create a file
 # Expected Result: File is created on server, program outputs list of files that were created
+def test_create_file(tmpdir):
+    with tempfile.TemporaryDirectory() as dir:
+        handler = FileSystemEventHandler()
+        def on_created(event):
+            assert event.is_directory is False
+            assert event.event_type == "created"
+            assert event.src_path == os.path.join(dir, "text.txt")
+        handler.on_created = on_created
+        observer = Observer()
+        observer.schedule(handler, path=dir, recursive=False)
+        observer.start()
+        with open(os.path.join(dir, "text.txt"), "w") as f:
+            f.write("text")
+        observer.stop()
+        observer.join()
+    #assert False
 
-def test_file_created(tmpdir): 
-    event_handler = MyHandler() 
-    observer = Observer() 
-    observer.schedule(event_handler, path = 'C:/Users/laura/OneDrive/Documents/prueba/repository') 
-    observer.start() 
-    #tmpdir.mkdir("destination")
-    time.sleep(1) 
-    observer.stop() 
-    observer.join() 
-    assert event_handler.on_created
-
-
+    
 
 # Test Case 2: Modify a file
 # Expected Result: File is modified on server, program outputs list of files that were changed
