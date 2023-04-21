@@ -34,6 +34,11 @@ class MyHandler(FileSystemEventHandler):
         # Create a path to the target destination directory
         dest_file_path = os.path.join(destination,server_name, dir_tos, subdir).replace("\\", "/")
         #print(dest_file_path)
+
+        # Exclude certain directories from being created
+        exclude_dirs = ['logs', 'bin', 'archive']
+        if dir_tos in exclude_dirs or subdir in exclude_dirs:
+            logging.warning(f'Skipping {or_path} because it is in an excluded directory')
         
         # Creates the TOS folder if does not exist
         subdir_parent_dir = os.path.join(destination, server_name, dir_tos).replace("\\", "/")
@@ -93,11 +98,27 @@ class MyHandler(FileSystemEventHandler):
         print(server_name)
         dest_file_path = os.path.join(destination,server_name, filename).replace("\\", "/")
         # If the target file exists, delete it and print a message.
-        if(os.path.exists(dest_file_path)):
-                logging.info(f"Deleted {dest_file_path}")
-                removed_file = os.remove(dest_file_path)
+        extension = ('.var', '.fil', '.tdr', '.txt')
+        ignore_extension = ('.log')
+        exclude_dirs = ['logs', 'bin', 'archive']
+        # If the file that triggered the event has a valid extension and not an extension that should be ignored, delete it from the target directory, but exclude certain directories.
+        if filename.endswith(extension) and not filename.endswith(ignore_extension):
+            if os.path.exists(dest_file_path):
+                # Check if the file is within an excluded directory
+                excluded = False
+                for dir in exclude_dirs:
+                    if dir in dest_file_path.split('/'):
+                        logging.warning(f"Skipping deletion of {dest_file_path} because it is in an excluded directory.")
+                        excluded = True
+                        break
+                if not excluded:
+                    logging.info(f"Deleted {dest_file_path}")
+                    removed_file = os.remove(dest_file_path)
+            else:
+                logging.error(f"The file {dest_file_path} could not be deleted.")
         else:
-            logging.error('The file could not be deleted in {dest_file_path}')
+            logging.error(f"The file {filename} could not be deleted because it has an ignored extension.")
+
 
 
 

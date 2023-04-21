@@ -1,35 +1,9 @@
-import shutil
 import os
 import pytest
 import tempfile
 from main import *
-from watchdog.events import FileSystemEvent
-
-# @pytest.fixture
-# def handler():
-#     return MyHandler()
-
-# def test_on_created(handler, capsys):
-#     # Create test file in source directory
-#     test_file = os.path.join(origin, "test.txt")
-#     with open(test_file, "w") as f:
-#         f.write("test")
-
-#     # Trigger on_created event
-#     event = FileSystemEvent(test_file)
-#     handler.on_created(event)
-
-#     # Check if file was copied to destination
-#     dest_file = os.path.join(destination, "repository", "Documents", "folder_sync_project", "test.txt")
-#     assert os.path.exists(dest_file)
-
-#     # Check if program outputs correct message
-#     captured = capsys.readouterr()
-#     expected_output = "Copied {} to {}\n".format(test_file, dest_file)
-#     assert captured.out == expected_output
-
-
-# Define the paths for testing
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 
 # Test Case 0: Sync the starting repo structure to the server
@@ -37,7 +11,7 @@ from watchdog.events import FileSystemEvent
 
 
 # Test Case 1: Create a file
-# Expected Result: File is created on server, program outputs list of files that were created
+# Expected Result: File is created on server
 def test_create_file(tmpdir):
     with tempfile.TemporaryDirectory() as dir:
         handler = FileSystemEventHandler()
@@ -58,37 +32,174 @@ def test_create_file(tmpdir):
     
 
 # Test Case 2: Modify a file
-# Expected Result: File is modified on server, program outputs list of files that were changed
+# Expected Result: File is modified on server
+def test_modify_file(tmpdir):
+    with tempfile.TemporaryDirectory() as dir:
+        handler = FileSystemEventHandler()
+        def on_modified(event):
+            assert not event.is_directory
+            assert event.event_type == "modified"
+            assert event.src_path == os.path.join(dir, "text.txt")
+        handler.on_modified = on_modified
+        observer = Observer()
+        observer.schedule(handler, path=dir, recursive=False)
+        observer.start()
+        with open(os.path.join(dir, "text.txt"), "w+") as f:
+            f.write("text")
+            time.sleep(1)
+            f.write("new text")
 
+        time.sleep(1)
+        observer.stop()
+        observer.join()
 
 
 # Test Case 3: Delete a file
-# Expected Result: File is deleted from server, program outputs list of files that were deleted
+# Expected Result: File is deleted from server
 
+def test_delete_file(tmpdir):
+    with tempfile.TemporaryDirectory() as dir:
+        handler = FileSystemEventHandler()
+        def on_deleted(event):
+            assert not event.is_directory
+            assert event.event_type == "deleted"
+            assert event.src_path == os.path.join(dir, "text.txt")
+        handler.on_deleted = on_deleted
+        observer = Observer()
+        observer.schedule(handler, path=dir, recursive=False)
+        observer.start()
+        with open(os.path.join(dir, "text.txt"), "w") as f:
+            f.write("text")
+        time.sleep(1)
+        os.remove(os.path.join(dir, "text.txt"))
+        time.sleep(1)
+        observer.stop()
+        observer.join()
 
 
 # Test Case 4: Create a directory
-# Expected Result: Directory is created on server, program outputs list of directories that were created
-
+# Expected Result: Directory is created on server
+def test_create_directory(tmpdir):
+    with tempfile.TemporaryDirectory() as dir:
+        handler = FileSystemEventHandler()
+        def on_created(event):
+            assert event.is_directory
+            assert event.event_type == "created"
+            assert event.src_path == os.path.join(dir, "testdir")
+        handler.on_created = on_created
+        observer = Observer()
+        observer.schedule(handler, path=dir, recursive=False)
+        observer.start()
+        os.mkdir(os.path.join(dir, "testdir"))
+        time.sleep(1)
+        observer.stop()
+        observer.join()
 
 
 # Test Case 5: Delete a directory
-# Expected Result: Directory is deleted from server, program outputs list of directories that were deleted
+# Expected Result: Directory is deleted from server
+def test_delete_directory(tmpdir):
+    with tempfile.TemporaryDirectory() as dir:
+        handler = FileSystemEventHandler()
+        def on_deleted(event):
+            assert not event.is_directory
+            assert event.event_type == "deleted"
+            assert event.src_path == os.path.join(dir, "testdir")
+            handler.on_deleted = on_deleted
+            observer = Observer()
+            observer.schedule(handler, path=dir, recursive=False)
+            observer.start()
+            os.mkdir(os.path.join(dir, "testdir"))
 
-
+            time.sleep(1)
+            os.rmdir(os.path.join(dir, "testdir"))
+            time.sleep(1)
+            observer.stop()
+            observer.join()
 
 # Test Case 6: Create a file with an extension that should be ignored
 # Expected Result: No changes to server
-
+def test_ignore_files_with_specific_extension(tmpdir):
+    with tempfile.TemporaryDirectory() as dir:
+        # Crea un archivo con la extensión .log
+        with open(os.path.join(dir, "text.log"), "w") as f:
+            f.write("text")
+        handler = FileSystemEventHandler()
+        events = []
+        def on_created(event):
+            ignore_extension = ('.log')
+            if event.is_directory is False and event.src_path.endswith(ignore_extension):
+                print(f"The file {event.src_path} was not copied because it has the extension {ignore_extension}")
+            else:
+                events.append(event)
+        handler.on_created = on_created
+        observer = Observer()
+        observer.schedule(handler, path=dir, recursive=False)
+        observer.start()
+        time.sleep(1)
+        observer.stop()
+        observer.join()
 
 
 # Test Case 7: Modify a file with an extension that should be ignored
 # Expected Result: No changes to server
+def test_ignore_modified_files_with_specific_extension(tmpdir):
+    with tempfile.TemporaryDirectory() as dir:
+        with open(os.path.join(dir, "text.var"), "w") as f:
+            f.write("text")
+        with open(os.path.join(dir, "text.log"), "w") as f:
+            f.write("text")
+        handler = FileSystemEventHandler()
+        events = []
+        def on_modified(event):
+            ignore_extension = ('.log')
+            if event.is_directory is False and event.src_path.endswith(ignore_extension):
+                print(f"The file {event.src_path} was not copied because it has the extension {ignore_extension}")
+            else:
+                events.append(event)
+        handler.on_modified = on_modified
+        observer = Observer()
+        observer.schedule(handler, path=dir, recursive=False)
+        observer.start()
+        time.sleep(1)
+        with open(os.path.join(dir, "text.log"), "a") as f:
+            f.write("more text")
+        time.sleep(1)
+        observer.stop()
+        observer.join()
+
+        assert not events, f"Unexpected events: {events}"
 
 
 
 # Test Case 8: Delete a file with an extension that should be ignored
 # Expected Result: No changes to server
+def test_ignore_deleted_files_with_specific_extension(tmpdir):
+    with tempfile.TemporaryDirectory() as dir:
+        with open(os.path.join(dir, "text.var"), "w") as f:
+            f.write("text")
+        with open(os.path.join(dir, "text.log"), "w") as f:
+            f.write("text")
+        handler = FileSystemEventHandler()
+        events = []
+        def on_deleted(event):
+            ignore_extension = ('.log')
+            if event.is_directory is False and event.src_path.endswith(ignore_extension):
+                print(f"The file {event.src_path} was not copied because it has the extension {ignore_extension}")
+            else:
+                events.append(event)
+        handler.on_deleted = on_deleted
+        observer = Observer()
+        observer.schedule(handler, path=dir, recursive=False)
+        observer.start()
+        time.sleep(1)
+        os.remove(os.path.join(dir, "text.log"))
+        time.sleep(1)
+
+        observer.stop()
+        observer.join()
+
+        assert not events, f"Unexpected events: {events}"
 
 
 
