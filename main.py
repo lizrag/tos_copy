@@ -37,7 +37,7 @@ class MyHandler(FileSystemEventHandler):
         third_dir = os.path.basename(os.path.dirname(or_path))
         print(f"{third_dir} este es el tercer directorio")
         # Create a path to the target destination directory
-        dest_file_path = os.path.join(destination,server,first_dir,second_dir,third_dir).replace("\\", "/")
+        # dest_file_path = os.path.join(destination,server,first_dir,second_dir,third_dir).replace("\\", "/")
         
         #Ignore certain names of directories
         ignore_dirs = ['logs', 'bin', 'archive']
@@ -65,9 +65,10 @@ class MyHandler(FileSystemEventHandler):
             return
         
         # Creates the TOS folder if does not exist
-        subdir_parent_dir = os.path.join(destination, first_dir, second_dir).replace("\\", "/")
-        if not os.path.exists(subdir_parent_dir):
-            os.makedirs(subdir_parent_dir, exist_ok=True)
+        # subdir_parent_dir = os.path.join(destination, first_dir, second_dir).replace("\\", "/")
+        # print(subdir_parent_dir)
+        # if not os.path.exists(subdir_parent_dir):
+        #     os.makedirs(subdir_parent_dir, exist_ok=True)
 
         # Creates the subdir folder if it doesn't exist
         if not os.path.exists(dest_file_path):
@@ -82,52 +83,51 @@ class MyHandler(FileSystemEventHandler):
             print("copy")
 
 
-    
 
-    # def on_modified(self, event):
-    # # Only process files, not directories.
-    #     if not event.is_directory:
-    #         or_path = event.src_path.replace("\\", "/")
-    #         # Extract the server name and the file name from the path.
-    #         server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
-    #         file_name = os.path.basename(or_path)
-    #         print(file_name)
-    #         # Create a path to the target directory and replace backslashes with forward slashes
-    #         dest_file_path = os.path.join(destination, server_name).replace("\\", "/")
-    #         if os.path.exists(dest_file_path) and os.path.isdir(dest_file_path): # verify destination path
-    #             extension = ('.var', '.fil', '.tdr', '.txt')
-    #             ignore_extension = ('.log')
-    #             if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
-    #                 # Use a lock to ensure that the file is only updated once
-    #                 with lock:
-    #                     # If the source file is newer, update the destination file and print a message.
-    #                     src_mtime = os.stat(or_path).st_mtime
-    #                     dst_file_path = os.path.join(dest_file_path, file_name).replace("\\", "/")
-    #                     if os.path.exists(or_path) and os.path.exists(dst_file_path):
-    #                         mtime_a = os.stat(or_path).st_mtime
-    #                         mtime_b = os.stat(dst_file_path).st_mtime
-    #                         if mtime_a > mtime_b:
-    #                             shutil.copy2(or_path, dst_file_path)
-    #                             print(f"The file {or_path} has been updated in {dst_file_path}.")
-    #                             logging.info(f"File updated from {or_path} in {dst_file_path}")
-    #                         else:
-    #                             print(f"The file {or_path} has not been updated in {dst_file_path}.")
-    #                             logging.info(f"File not updated from {or_path} in {dst_file_path}")
-    #             else:
-    #                 print(f"The destination path {dest_file_path} is invalid.")
+    def on_modified(self, event):
+    # Only process files, not directories.
+        if not event.is_directory:
+            or_path = event.src_path.replace("\\", "/")
+            # Extract the server name and the file name from the path.
+            server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
+            file_name = os.path.basename(or_path)
+            print(file_name)
+            # Create a path to the target directory and replace backslashes with forward slashes
+            dest_file_path = os.path.join(destination, server_name).replace("\\", "/")
+            if os.path.exists(dest_file_path) and os.path.isdir(dest_file_path): # verify destination path
+                extension = ('.var', '.fil', '.tdr', '.txt')
+                ignore_extension = ('.log')
+                if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
+                    # Use a lock to ensure that the file is only updated once
+                    with lock:
+                        # If the source file is newer, update the destination file and print a message.
+                        src_mtime = os.stat(or_path).st_mtime
+                        dst_file_path = os.path.join(dest_file_path, file_name).replace("\\", "/")
+                        if os.path.exists(or_path) and os.path.exists(dst_file_path):
+                            mtime_a = os.stat(or_path).st_mtime
+                            mtime_b = os.stat(dst_file_path).st_mtime
+                            if mtime_a > mtime_b:
+                                shutil.copy2(or_path, dst_file_path)
+                                print(f"The file {or_path} has been updated in {dst_file_path}.")
+                                logging.info(f"File updated from {or_path} in {dst_file_path}")
+                            else:
+                                print(f"The file {or_path} has not been updated in {dst_file_path}.")
+                                logging.info(f"File not updated from {or_path} in {dst_file_path}")
+                else:
+                    print(f"The destination path {dest_file_path} is invalid.")
                         
 
-    # def on_deleted(self, event):
-    #     or_path = event.src_path.replace("\\", "/")
-    #     filename = os.path.basename(event.src_path)
-    #     print(filename)
-    #     server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
-    #     print(server_name)
-    #     dest_file_path = os.path.join(destination,server_name, filename).replace("\\", "/")
-    #     # If the target file exists, delete it and print a message.
-    #     if(os.path.exists(dest_file_path)):
-    #             logging.info(f"Deleted {dest_file_path}")
-    #             removed_file = os.remove(dest_file_path)
+    def on_deleted(self, event):
+        or_path = event.src_path.replace("\\", "/")
+        filename = os.path.basename(event.src_path)
+        print(filename)
+        server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
+        print(server_name)
+        dest_file_path = os.path.join(destination,server_name, filename).replace("\\", "/")
+        # If the target file exists, delete it and print a message.
+        if(os.path.exists(dest_file_path)):
+                logging.info(f"Deleted {dest_file_path}")
+                removed_file = os.remove(dest_file_path)
 
 
 
