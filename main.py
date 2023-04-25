@@ -37,6 +37,11 @@ class MyHandler(FileSystemEventHandler):
         # Create a path to the target destination directory
         dest_file_path = os.path.join(destination,server_name, dir_tos, subdir).replace("\\", "/")
         #print(dest_file_path)
+        ignore_dirs = ['logs', 'bin', 'archive']
+
+        if subdir in ignore_dirs or dir_tos in ignore_dirs:
+            logging.info(f"Ignoring directory '{subdir}' because it's in the ignore list")
+            return
         
         # Creates the TOS folder if does not exist
         subdir_parent_dir = os.path.join(destination, server_name, dir_tos).replace("\\", "/")
