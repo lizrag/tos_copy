@@ -46,3 +46,38 @@
         #     shutil.copy2(or_path, os.path.join(dest_file_path, file_name))
         #     logging.info(f"Copied {or_path} to {dest_file_path}")
         #     print("copy")
+
+
+
+
+# def on_modified(self, event):
+#     # Only process files, not directories.
+#         if not event.is_directory:
+#             or_path = event.src_path.replace("\\", "/")
+#             # Extract the server name and the file name from the path.
+#             server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
+#             file_name = os.path.basename(or_path)
+#             print(file_name)
+#             # Create a path to the target directory and replace backslashes with forward slashes
+#             dest_file_path = os.path.join(destination, server_name).replace("\\", "/")
+#             if os.path.exists(dest_file_path) and os.path.isdir(dest_file_path): # verify destination path
+#                 extension = ('.var', '.fil', '.tdr', '.txt')
+#                 ignore_extension = ('.log')
+#                 if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
+#                     # Use a lock to ensure that the file is only updated once
+#                     with lock:
+#                         # If the source file is newer, update the destination file and print a message.
+#                         src_mtime = os.stat(or_path).st_mtime
+#                         dst_file_path = os.path.join(dest_file_path, file_name).replace("\\", "/")
+#                         if os.path.exists(or_path) and os.path.exists(dst_file_path):
+#                             mtime_a = os.stat(or_path).st_mtime
+#                             mtime_b = os.stat(dst_file_path).st_mtime
+#                             if mtime_a > mtime_b:
+#                                 shutil.copy2(or_path, dst_file_path)
+#                                 print(f"The file {or_path} has been updated in {dst_file_path}.")
+#                                 logging.info(f"File updated from {or_path} in {dst_file_path}")
+#                             else:
+#                                 print(f"The file {or_path} has not been updated in {dst_file_path}.")
+#                                 logging.info(f"File not updated from {or_path} in {dst_file_path}")
+#                 else:
+#                     print(f"The destination path {dest_file_path} is invalid.")

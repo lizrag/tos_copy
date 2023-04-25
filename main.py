@@ -36,8 +36,6 @@ class MyHandler(FileSystemEventHandler):
         # Extract the subdir 
         third_dir = os.path.basename(os.path.dirname(or_path))
         print(f"{third_dir} este es el tercer directorio")
-        # Create a path to the target destination directory
-        # dest_file_path = os.path.join(destination,server,first_dir,second_dir,third_dir).replace("\\", "/")
         
         #Ignore certain names of directories
         ignore_dirs = ['logs', 'bin', 'archive']
@@ -85,34 +83,59 @@ class MyHandler(FileSystemEventHandler):
 
 
     def on_modified(self, event):
-    # Only process files, not directories.
         if not event.is_directory:
             or_path = event.src_path.replace("\\", "/")
-            # Extract the server name and the file name from the path.
-            server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
+            print(or_path)
+            server = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(or_path)))))
+            print(server)
+            # Extract the first folder name from the path
+            first_dir = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
+            print(f"{first_dir} este es el primer directorio")
+            # Extract the file name from the path
             file_name = os.path.basename(or_path)
             print(file_name)
-            # Create a path to the target directory and replace backslashes with forward slashes
-            dest_file_path = os.path.join(destination, server_name).replace("\\", "/")
-            if os.path.exists(dest_file_path) and os.path.isdir(dest_file_path): # verify destination path
+            # Extract the secind folder
+            second_dir = os.path.basename(os.path.dirname(os.path.dirname(or_path)))
+            print(f"{second_dir} este es el segundo directorio")
+            # Extract the subdir 
+            third_dir = os.path.basename(os.path.dirname(or_path))
+            print(f"{third_dir} este es el tercer directorio")
+            
+            #extracts the number of componentes in the path 
+            num_components = len([component for component in or_path.split("/") if component])
+            print(num_components)
+
+            # Check how many components there are to create the paths
+            if num_components >= 11:
+                # There are 11 components, create destination path accordingly
+                dest_file_path = os.path.join(destination, server, first_dir, second_dir, third_dir).replace("\\", "/")
+            elif num_components <= 10:
+                # There are 10 components, create destination path accordingly
+                dest_file_path = os.path.join(destination,first_dir, second_dir, third_dir).replace("\\", "/")
+                print(dest_file_path)
+            else:
+                # Handle the case where there are a different number of components
+                logging.warning(f"Unexpected number of components in path: {num_components}")
+                return
+            
+
+            if os.path.exists(dest_file_path) and os.path.isdir(dest_file_path):
                 extension = ('.var', '.fil', '.tdr', '.txt')
                 ignore_extension = ('.log')
                 if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
-                    # Use a lock to ensure that the file is only updated once
                     with lock:
-                        # If the source file is newer, update the destination file and print a message.
                         src_mtime = os.stat(or_path).st_mtime
-                        dst_file_path = os.path.join(dest_file_path, file_name).replace("\\", "/")
-                        if os.path.exists(or_path) and os.path.exists(dst_file_path):
+                        #dst_file_path = os.path.join(dest_file_path, file_name).replace("\\", "/")
+                        if os.path.exists(or_path) and os.path.exists(dest_file_path):
                             mtime_a = os.stat(or_path).st_mtime
-                            mtime_b = os.stat(dst_file_path).st_mtime
+                            mtime_b = os.stat(dest_file_path).st_mtime
                             if mtime_a > mtime_b:
-                                shutil.copy2(or_path, dst_file_path)
-                                print(f"The file {or_path} has been updated in {dst_file_path}.")
-                                logging.info(f"File updated from {or_path} in {dst_file_path}")
+                                shutil.copy2(or_path, dest_file_path)
+                                print(f"The file {or_path} has been updated in {dest_file_path}.")
+                                logging.info(f"File updated from {or_path} in {dest_file_path}")
                             else:
-                                print(f"The file {or_path} has not been updated in {dst_file_path}.")
-                                logging.info(f"File not updated from {or_path} in {dst_file_path}")
+                                print(f"The file {or_path} has not been updated in {dest_file_path}.")
+                                logging.info(f"File not updated from {or_path} in {dest_file_path}")
                 else:
                     print(f"The destination path {dest_file_path} is invalid.")
                         
