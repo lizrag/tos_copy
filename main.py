@@ -12,10 +12,24 @@ from watchdog.events import (
     EVENT_TYPE_MOVED
 )
 
-origin = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
-destination = "C:/Users/laura.rangelroman/Documents/folder_sync_project"
+origin = "C:/Users/laura/OneDrive/Documents/folder_sync_project/repository"
+destination = "C:/Users/laura/OneDrive/Documents/folder_sync_project"
 
 lock = threading.Lock()
+
+
+def find_references(or_path, references):
+    found_ref = False
+    for ref in references:
+        if ref in or_path and not found_ref:
+            index = or_path.index(ref)
+            # add all the components that comes after the reference
+            new_route = or_path[index:]
+            found_ref = True
+    if not found_ref:
+        new_route = or_path
+    print(f"this is the {new_route}")
+    return new_route
 
 
 class MyHandler(FileSystemEventHandler):
@@ -26,28 +40,18 @@ class MyHandler(FileSystemEventHandler):
         #Ignore certain names of directories
         ignore_dirs = ['logs', 'bin', 'archive']
         #check for the references folders
-        references = ['server_a', 'server_b', 'server_c']
-
-        new_route = ""
-        found_ref = False 
+        references = ['server_A', 'server_B', 'server_C']
 
         # Look for the first reference in the list of references
-        for ref in references:
-            if ref in or_path and not found_ref:
-                index = or_path.index(ref)
-                # add all the components that comes after the reference
-                new_route = or_path[index:]
-                found_ref = True
-        if not found_ref:
-            new_route = or_path
-
-        #Creates the new destination path
+        new_route = find_references(or_path, references)
+        print(new_route)
+        # #Creates the new destination path
         dest_file_path = os.path.join(destination,new_route).replace("\\", "/")
         print(dest_file_path)     
-        # Split the new route into a list of path components
+        # # Split the new route into a list of path components
         path_components = new_route.split("/")
 
-        #Ignore the directories checking each folder
+        # #Ignore the directories checking each folder
         skip_processing = False
         for component in path_components:
             if not skip_processing:
@@ -55,7 +59,7 @@ class MyHandler(FileSystemEventHandler):
                     logging.info(f"Ignoring directory {component} because it's in the ignore list")
                     skip_processing = True
 
-        # Remove the last componentonent (the file name) if it contains a dot (".")
+        # # # # Remove the last componentonent (the file name) if it contains a dot (".")
         if "." in path_components[-1]:
             path_components = path_components[:-1]
         # Create each folder in the destination path, if it does not exist
@@ -66,10 +70,11 @@ class MyHandler(FileSystemEventHandler):
                 os.makedirs(os.path.join(destination, current_path))
         
 
-        # If the file that triggered the event has a valid extension and not an extension that should be include, copy it to the target directory
+        # # # # If the file that triggered the event has a valid extension and not an extension that should be include, copy it to the target directory
         extension = ('.var', '.fil', '.tdr', '.txt')
         ignore_extension = ('.log')
         if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
+            print(dest_file_path)
             shutil.copy2(or_path, dest_file_path)
             logging.info(f"Copied {or_path} to {dest_file_path}")
             print("copy")
@@ -81,20 +86,11 @@ class MyHandler(FileSystemEventHandler):
         or_path = event.src_path.replace("\\", "/")
         file_name = os.path.basename(or_path)   
         #check for the references folders
-        references = ['server_a', 'server_b', 'server_c']
-
-        new_route = ""
-        found_ref = False 
+        references = ['server_A', 'server_B', 'server_C']
 
         # Look for the first reference in the list of references
-        for ref in references:
-            if ref in or_path and not found_ref:
-                index = or_path.index(ref)
-                # add all the components that comes after the reference
-                new_route = or_path[index:]
-                found_ref = True
-        if not found_ref:
-            new_route = or_path
+        new_route = find_references(or_path, references)
+        print(new_route)
 
         #Creates the new destination path
         dest_file_path = os.path.join(destination,new_route).replace("\\", "/")
@@ -132,20 +128,11 @@ class MyHandler(FileSystemEventHandler):
         #Ignore certain names of directories
         ignore_dirs = ['logs', 'bin', 'archive']
         #check for the references folders
-        references = ['server_a', 'server_b', 'server_c']
-
-        new_route = ""
-        found_ref = False 
+        references = ['server_A', 'server_B', 'server_C']
 
         # Look for the first reference in the list of references
-        for ref in references:
-            if ref in or_path and not found_ref:
-                index = or_path.index(ref)
-                # add all the components that comes after the reference
-                new_route = or_path[index:]
-                found_ref = True
-        if not found_ref:
-            new_route = or_path
+        new_route = find_references(or_path, references)
+        print(new_route)
     
         # Split the new route into a list of path components
         path_components = new_route.split("/")    

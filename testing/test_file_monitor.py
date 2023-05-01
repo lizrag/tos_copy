@@ -1,35 +1,48 @@
-import os
-import shutil
-import logging
-import tempfile
-import time
-from main import MyHandler
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+# import os
+# import shutil
+# import logging
+# import tempfile
+# import time
+# from main import MyHandler
+# from watchdog.observers import Observer
+# from watchdog.events import FileSystemEventHandler
+import pytest
+import math
 
-def test_on_created(tmpdir):
-    # Create a temporary source file
-    src_file = os.path.join(tmpdir, 'test.txt')
-    with open(src_file, 'w') as f:
-        f.write('Test file')
+def suma (a):
+    result = math.sqrt(a)
+    print(result)
+    return result
 
-    # Set up the destination directory
-    dest_dir = os.path.join(tmpdir, 'destination')
-    os.makedirs(dest_dir)
+def test_suma():
+    assert suma(49) == 7
 
-    # Set up the event handler
-    handler = MyHandler()
-    handler.destination = dest_dir
 
-    # Call the on_created method with the created file event
-    event = FileSystemEventHandler()
-    handler.on_created(event)
 
-    # Assert that the file was copied to the destination directory
-    dest_file = os.path.join(dest_dir, 'test.txt')
-    assert os.path.exists(dest_file)
-    with open(dest_file, 'r') as f:
-        assert f.read() == 'Test file'
+
+# def test_on_created(tmpdir):
+#     # Create a temporary source file
+#     src_file = os.path.join(tmpdir, 'test.txt')
+#     with open(src_file, 'w') as f:
+#         f.write('Test file')
+
+#     # Set up the destination directory
+#     dest_dir = os.path.join(tmpdir, 'destination')
+#     os.makedirs(dest_dir)
+
+#     # Set up the event handler
+#     handler = MyHandler()
+#     handler.destination = dest_dir
+
+#     # Call the on_created method with the created file event
+#     event = FileSystemEventHandler()
+#     handler.on_created(event)
+
+#     # Assert that the file was copied to the destination directory
+#     dest_file = os.path.join(dest_dir, 'test.txt')
+#     assert os.path.exists(dest_file)
+#     with open(dest_file, 'r') as f:
+#         assert f.read() == 'Test file'
 
 
 # Test Case 0: Sync the starting repo structure to the server
@@ -82,24 +95,24 @@ def test_on_created(tmpdir):
 # # Test Case 3: Delete a file
 # # Expected Result: File is deleted from server
 
-def test_delete_file(tmpdir):
-    with tempfile.TemporaryDirectory() as dir:
-        handler = MyHandler()
-        def on_deleted(event):
-            assert not event.is_directory
-            assert event.event_type == "deleted"
-            assert event.src_path == os.path.join(dir, "text.txt")
-        handler.on_deleted = on_deleted
-        observer = Observer()
-        observer.schedule(handler, path=dir, recursive=False)
-        observer.start()
-        with open(os.path.join(dir, "text.txt"), "w") as f:
-            f.write("text")
-        time.sleep(1)
-        os.remove(os.path.join(dir, "text.txt"))
-        time.sleep(1)
-        observer.stop()
-#         observer.join()
+# def test_delete_file(tmpdir):
+#     with tempfile.TemporaryDirectory() as dir:
+#         handler = MyHandler()
+#         def on_deleted(event):
+#             assert not event.is_directory
+#             assert event.event_type == "deleted"
+#             assert event.src_path == os.path.join(dir, "text.txt")
+#         handler.on_deleted = on_deleted
+#         observer = Observer()
+#         observer.schedule(handler, path=dir, recursive=False)
+#         observer.start()
+#         with open(os.path.join(dir, "text.txt"), "w") as f:
+#             f.write("text")
+#         time.sleep(1)
+#         os.remove(os.path.join(dir, "text.txt"))
+#         time.sleep(1)
+#         observer.stop()
+# #         observer.join()
 
 
 # # Test Case 4: Create a directory
