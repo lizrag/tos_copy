@@ -80,6 +80,7 @@ class MyHandler(FileSystemEventHandler):
             shutil.copy2(or_path, dest_file_path)
             logging.info(f"Copied {or_path} to {dest_file_path}")
             print("copy")
+            self.events = dest_file_path
 
 
 

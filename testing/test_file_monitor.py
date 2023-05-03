@@ -25,7 +25,7 @@ def test_on_created():
     origin_observer.start()
 
     # Creamos el archivo deseado en la ruta deseada (variable file_route) y escribimos algo
-    file = os.path.join(file_route, 'test_file.txt')
+    file = os.path.join(file_route, 'test_file_3.txt')
     with open(file, 'w') as f:
         f.write('Hello, Watchdog!')
     # Tiempo de espera para que el observer alcance a escuchar el evento
