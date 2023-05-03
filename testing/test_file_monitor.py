@@ -1,21 +1,41 @@
-# import os
+import os
 # import shutil
 # import logging
 # import tempfile
 # import time
-# from main import MyHandler
-# from watchdog.observers import Observer
+from main import MyHandler
+from unittest.mock import MagicMock
+from watchdog.observers import Observer
 # from watchdog.events import FileSystemEventHandler
 import pytest
-import math
 
-def suma (a):
-    result = math.sqrt(a)
-    print(result)
-    return result
 
-def test_suma():
-    assert suma(49) == 7
+
+def test_on_created():
+    #Esta, es la ruta que le vamos a pasar al observer, para que sepa dónde va a escuchar los eventos
+    origin_route = "C:/Users/laura/OneDrive/Documents/folder_sync_project/repository"
+    #Esta, es la ruta en donde queremos crear nuestro archivo de prueba (puedes ponerle la que tú quieras)
+    file_route = "C:/Users/laura/OneDrive/Documents/folder_sync_project/repository/server_A/TOS/console"
+    # Hacemos la instancia de la clase que creaste (que es el manejador de eventos)
+    handler = MyHandler()
+    # Aquí, hacemos la configuración del observer para que sepa, qué clase va a manejar los eventos (la clase MyHandler) y en dónde tiene que escuchar esos eventos (variable origin_route)
+    origin_observer = Observer()
+    origin_observer.schedule(handler, origin_route, recursive=True)
+    # Que empiece a escuchar los eventos
+    origin_observer.start()
+
+    # Creamos el archivo deseado en la ruta deseada (variable file_route) y escribimos algo
+    file = os.path.join(file_route, 'test_file.txt')
+    with open(file, 'w') as f:
+        f.write('Hello, Watchdog!')
+    # Tiempo de espera para que el observer alcance a escuchar el evento
+    origin_observer.join(timeout=1)
+    # Detener el observer
+    origin_observer.stop()
+    # Ahora, la ruta destino (la que construyes en todo el proceso), se checa si existe y de ser así, quiere decir que el archivo está creado correctamente, junto con todos los directorios en donde debe estar contenido
+    assert os.path.exists(handler.events)
+
+
 
 
 

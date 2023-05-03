@@ -33,6 +33,8 @@ def find_references(or_path, references):
 
 
 class MyHandler(FileSystemEventHandler):
+    def __init__(self):
+        self.events = ""
     def on_created(self, event):
         # Replace backslashes with forward slashes in the source path.
         or_path = event.src_path.replace("\\", "/")
