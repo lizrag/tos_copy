@@ -12,8 +12,8 @@ from watchdog.events import (
     EVENT_TYPE_MOVED
 )
 
-origin = "C:/Users/laura/OneDrive/Documents/folder_sync_project/repository"
-destination = "C:/Users/laura/OneDrive/Documents/folder_sync_project"
+origin = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
+destination = "C:/Users/laura.rangelroman/Documents/folder_sync_project"
 
 lock = threading.Lock()
 
@@ -37,12 +37,13 @@ class MyHandler(FileSystemEventHandler):
         self.events = ""
     def on_created(self, event):
         # Replace backslashes with forward slashes in the source path.
+        event_t = event.event_type
         or_path = event.src_path.replace("\\", "/")
         file_name = os.path.basename(or_path)   
         #Ignore certain names of directories
         ignore_dirs = ['logs', 'bin', 'archive']
         #check for the references folders
-        references = ['server_A', 'server_B', 'server_C']
+        references = ['server_a', 'server_b', 'server_c']
 
         # Look for the first reference in the list of references
         new_route = find_references(or_path, references)
@@ -89,7 +90,7 @@ class MyHandler(FileSystemEventHandler):
         or_path = event.src_path.replace("\\", "/")
         file_name = os.path.basename(or_path)   
         #check for the references folders
-        references = ['server_A', 'server_B', 'server_C']
+        references = ['server_a', 'server_b', 'server_c']
 
         # Look for the first reference in the list of references
         new_route = find_references(or_path, references)
@@ -118,6 +119,7 @@ class MyHandler(FileSystemEventHandler):
                         shutil.copy2(or_path, dest_file_path)
                         print(f"The file {file_name} has been updated in {dest_file_path}.")
                         logging.info(f"File updated from {or_path} in {current_path}")
+                        self.events = dest_file_path
                     except Exception as e:
                         print(f"Error copying file {file_name}: {e}")
                         logging.error(f"Error copying file {file_name}: {e}")
@@ -131,7 +133,7 @@ class MyHandler(FileSystemEventHandler):
         #Ignore certain names of directories
         ignore_dirs = ['logs', 'bin', 'archive']
         #check for the references folders
-        references = ['server_A', 'server_B', 'server_C']
+        references = ['server_a', 'server_b', 'server_c']
 
         # Look for the first reference in the list of references
         new_route = find_references(or_path, references)
