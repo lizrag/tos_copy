@@ -35,9 +35,10 @@ def find_references(or_path, references):
 class MyHandler(FileSystemEventHandler):
     def __init__(self):
         self.events = ""
+        self.event_type = ""
     def on_created(self, event):
         # Replace backslashes with forward slashes in the source path.
-        event_t = event.event_type
+        self.event_type = event.event_type
         or_path = event.src_path.replace("\\", "/")
         file_name = os.path.basename(or_path)   
         #Ignore certain names of directories
@@ -87,6 +88,7 @@ class MyHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         # Replace backslashes with forward slashes in the source path.
+        self.event_type = event.event_type
         or_path = event.src_path.replace("\\", "/")
         file_name = os.path.basename(or_path)   
         #check for the references folders

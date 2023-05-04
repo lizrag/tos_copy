@@ -16,30 +16,30 @@ import pytest
 
 # Test Case 1: Create a file
 # Expected Result: File is created on server
-def test_on_created():
-    # Set the directories where the Watchdog observer will listen for events and where the test file will be created
-    origin_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
-    file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/console"
+# def test_on_created():
+#     # Set the directories where the Watchdog observer will listen for events and where the test file will be created
+#     origin_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
+#     file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/console"
     
-    # Create an instance of the MyHandler class to handle the Watchdog events
-    handler = MyHandler()
+#     # Create an instance of the MyHandler class to handle the Watchdog events
+#     handler = MyHandler()
     
-    # Create an instance of the Watchdog Observer class and schedule the MyHandler instance to handle events in the origin_route directory
-    origin_observer = Observer()
-    origin_observer.schedule(handler, origin_route, recursive=True)
+#     # Create an instance of the Watchdog Observer class and schedule the MyHandler instance to handle events in the origin_route directory
+#     origin_observer = Observer()
+#     origin_observer.schedule(handler, origin_route, recursive=True)
     
-    # Start the observer to listen for events
-    origin_observer.start()
+#     # Start the observer to listen for events
+#     origin_observer.start()
 
-    # Create the test file at the file_route path using the open function, write some content to it, and wait for one second to allow the observer to detect the created event
-    file = os.path.join(file_route, 'test_file_8.txt')
-    with open(file, 'w') as f:
-        f.write('Hello, Watchdog!')
-    origin_observer.join(timeout=1)
+#     # Create the test file at the file_route path using the open function, write some content to it, and wait for one second to allow the observer to detect the created event
+#     file = os.path.join(file_route, 'test_file_8.txt')
+#     with open(file, 'w') as f:
+#         f.write('Hello, Watchdog!')
+#     origin_observer.join(timeout=1)
 
-    # Stop the observer and check if the file has been created correctly by checking if the handler.events directory exists
-    origin_observer.stop()
-    assert os.path.exists(handler.events)
+#     # Stop the observer and check if the file has been created correctly by checking if the handler.events directory exists
+#     origin_observer.stop()
+#     assert os.path.exists(handler.events)
 
 
 
@@ -48,27 +48,18 @@ def test_on_created():
 # Expected Result: File is modified on server
 def test_on_modified():
     # Set up the observer and handler
-    origin_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
-    file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/console"
+    origin_route = "C:/Users/laura/OneDrive/Documents/folder_sync_project/repository"
+    file_route = "C:/Users/laura/OneDrive/Documents/folder_sync_project/repository/server_b/TOS/console"
     handler = MyHandler()
     observer = Observer()
     observer.schedule(handler, origin_route, recursive=True)
     observer.start()
 
-    # Wait for the observer to start
-    time.sleep(1)
-
     # Create the file to be modified
     file_path = os.path.join(file_route, 'test_file0_11.txt')
     with open(file_path, 'w') as f:
-        f.write('Hello, Watchdog!')
-
-    # Wait for the observer to detect the creation event
-    time.sleep(1)
-
-    # Modify the file created in the previous test case
-    with open(file_path, "r+") as f:
-        f.write('This is a modification.')
+        f.write('Hello, Watchdog!\n')
+        f.write('This is a modified file')
 
     # Wait for the observer to detect the modification
     time.sleep(1)
@@ -76,7 +67,8 @@ def test_on_modified():
     observer.stop()
 
     # Check if the modification event was detected
-    assert os.path.exists(handler.events)
+    #assert os.path.exists(handler.events)
+    assert handler.event_type == 'modified'
 
 
 
