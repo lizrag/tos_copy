@@ -48,20 +48,17 @@ class MyHandler(FileSystemEventHandler):
 
         # Look for the first reference in the list of references
         new_route = find_references(or_path, references)
-        print(new_route)
+        #print(new_route)
         # #Creates the new destination path
         dest_file_path = os.path.join(destination,new_route).replace("\\", "/")
-        print(dest_file_path)     
+        #print(dest_file_path)     
         # # Split the new route into a list of path components
         path_components = new_route.split("/")
 
-        # #Ignore the directories checking each folder
-        skip_processing = False
-        for component in path_components:
-            if not skip_processing:
-                if component in ignore_dirs:
-                    logging.info(f"Ignoring directory {component} because it's in the ignore list")
-                    skip_processing = True
+        # Check if the path contains an ignored directory
+        if any(dir in or_path for dir in ignore_dirs):
+            logging.info(f"Ignoring path {or_path} because it contains an ignored directory")
+            return
 
         # # # # Remove the last componentonent (the file name) if it contains a dot (".")
         if "." in path_components[-1]:
@@ -78,7 +75,7 @@ class MyHandler(FileSystemEventHandler):
         extension = ('.var', '.fil', '.tdr', '.txt')
         ignore_extension = ('.log')
         if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
-            print(dest_file_path)
+            #print(dest_file_path)
             shutil.copy2(or_path, dest_file_path)
             logging.info(f"Copied {or_path} to {dest_file_path}")
             print("copy")
@@ -96,11 +93,11 @@ class MyHandler(FileSystemEventHandler):
 
         # Look for the first reference in the list of references
         new_route = find_references(or_path, references)
-        print(new_route)
+        #print(new_route)
 
         #Creates the new destination path
         dest_file_path = os.path.join(destination,new_route).replace("\\", "/")
-        print(dest_file_path)     
+        #print(dest_file_path)     
         # Split the new route into a list of path components
         path_components = new_route.split("/")
 
@@ -129,33 +126,34 @@ class MyHandler(FileSystemEventHandler):
                         
 
     def on_deleted(self, event):
+        # self.event_type = event.event_type
+        # print(self.event_type)
         # Replace backslashes with forward slashes in the source path.
         or_path = event.src_path.replace("\\", "/")
+        #print(f"Aqui esta {or_path}")
         file_name = os.path.basename(or_path)   
         #Ignore certain names of directories
         ignore_dirs = ['logs', 'bin', 'archive']
         #check for the references folders
         references = ['server_a', 'server_b', 'server_c']
 
-        # Look for the first reference in the list of references
+        # # Look for the first reference in the list of references
         new_route = find_references(or_path, references)
-        print(new_route)
+        #print(f"todo la lista {new_route}")
     
-        # Split the new route into a list of path components
+        # # Split the new route into a list of path components
         path_components = new_route.split("/")    
 
-        #Ignore the directories checking each folder
-        skip_processing = False
-        for component in path_components:
-            if not skip_processing:
-                if component in ignore_dirs:
-                    logging.info(f"Ignoring directory {component} because it's in the ignore list")
+        # Check if the path contains an ignored directory
+        if any(dir in or_path for dir in ignore_dirs):
+            logging.info(f"Ignoring path {or_path} because it contains an ignored directory")
+            return
 
-        #Creates the new destination path
+        # #Creates the new destination path
         dest_file_path_remove = os.path.join(destination,new_route).replace("\\", "/")
         print(f"Esta es la dest {dest_file_path_remove}") 
 
-        # If the target file exists, delete it and print a message.
+        # # If the target file exists, delete it and print a message.
         if(os.path.exists(dest_file_path_remove)):
             try:
                 os.remove(dest_file_path_remove)
@@ -164,6 +162,8 @@ class MyHandler(FileSystemEventHandler):
             except Exception as e:
                 print(f"Error deleting file {file_name}: {e}")
                 logging.error(f"Error deleting file {file_name}: {e}")
+        self.events = dest_file_path_remove
+        print(f"el evento es este {self.events}")
 
 
 
