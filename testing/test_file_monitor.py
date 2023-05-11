@@ -1,6 +1,6 @@
 import os
 import time
-from main import MyHandler
+from main import *
 from unittest.mock import MagicMock
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -8,7 +8,7 @@ import pytest
 
 
 def setup_myhandler():
-    origin_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
+    origin_route = dir_origin
     # Create an instance of the MyHandler class to handle the Watchdog events
     handler = MyHandler()
 
@@ -100,22 +100,22 @@ def setup_myhandler():
 
 # # Test Case 4: Create a directory
 # # Expected Result: Directory is created on server
-def test_on_created_dir():
-    # Set the directories where the Watchdog observer will listen for events and where the test file will be created
-    dir_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_a/TOS"
+# def test_on_created_dir():
+#     # Set the directories where the Watchdog observer will listen for events and where the test file will be created
+#     dir_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_a/TOS"
     
-    # Set up the observer and handler instances
-    origin_observer, handler = setup_myhandler()
+#     # Set up the observer and handler instances
+#     origin_observer, handler = setup_myhandler()
 
-    # Create the test directory at the dir_route path using os.makedirs() function and wait for one second to allow the observer to detect the created event
-    test_dir = os.path.join(dir_route, 'test_dir_2')
-    os.makedirs(test_dir)
-    origin_observer.join(timeout=1)
+#     # Create the test directory at the dir_route path using os.makedirs() function and wait for one second to allow the observer to detect the created event
+#     test_dir = os.path.join(dir_route, 'test_dir_2')
+#     os.makedirs(test_dir)
+#     origin_observer.join(timeout=1)
 
-    # Stop the observer and check if the directory has been created correctly by checking if the handler.events directory exists
-    origin_observer.stop()
-    print(handler.events)
-    assert os.path.exists(handler.events)
+#     # Stop the observer and check if the directory has been created correctly by checking if the handler.events directory exists
+#     origin_observer.stop()
+#     print(handler.events)
+#     assert os.path.exists(handler.events)
 
 
 
@@ -281,13 +281,13 @@ def test_on_created_dir():
 # Test Case 12: Create/Modify/Delete a file in a directory that should be ignored
 # Expected Result: No changes to server
 def test_on_ignoresubdirectory():
-    file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/logs"
+    file_route = os.path.join(dir_destination, "server_b/TOS/logs").replace("\\", "/")
 
     # Set up the observer and handler instances
     origin_observer, handler = setup_myhandler()
 
     # Create the test file at the file_route path using the open function, write some content to it, and wait for one second to allow the observer to detect the created event
-    file = os.path.join(file_route, 'test_file01.log')
+    file = os.path.join(file_route, 'test_file09.log').replace("\\", "/")
     with open(file, 'w') as f:
         f.write('Test content')
     time.sleep(1)

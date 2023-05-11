@@ -1,0 +1,2 @@
+Hello, Watchdog!
+This is a modified file

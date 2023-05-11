@@ -12,6 +12,14 @@ from watchdog.events import (
     EVENT_TYPE_MOVED
 )
 
+dir_path = os.path.dirname(os.path.abspath(__file__))
+print(dir_path)
+dir_origin = os.path.join(dir_path,"folder_sync_project/repository").replace("\\", "/")
+print(dir_origin)
+dir_destination = os.path.join(dir_path,"folder_sync_project").replace("\\", "/")
+print(dir_destination)
+
+
 origin = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
 destination = "C:/Users/laura.rangelroman/Documents/folder_sync_project"
 
