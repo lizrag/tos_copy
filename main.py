@@ -20,8 +20,8 @@ dir_destination = os.path.join(dir_path,"folder_sync_project").replace("\\", "/"
 print(dir_destination)
 
 
-origin = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
-destination = "C:/Users/laura.rangelroman/Documents/folder_sync_project"
+# origin = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
+# destination = "C:/Users/laura.rangelroman/Documents/folder_sync_project"
 
 lock = threading.Lock()
 
@@ -45,6 +45,34 @@ class MyHandler(FileSystemEventHandler):
         self.events = ""
         self.event_type = ""
     def on_created(self, event):
+        if event.is_directory:
+            self.event_type = event.event_type
+            or_path = event.src_path.replace("\\", "/")
+            ignore_dirs = ['logs', 'bin', 'archive']
+            references = ['server_a', 'server_b', 'server_c']
+            # Look for the first reference in the list of references
+            new_route = find_references(or_path, references)
+            #print(new_route)
+            # #Creates the new destination path
+            dest_file_path = os.path.join(dir_destination, new_route).replace("\\", "/")
+            #print(dest_file_path)     
+            # # Split the new route into a list of path components
+            path_components = new_route.split("/")
+            # Check if the path contains an ignored directory
+            if any(dir in or_path for dir in ignore_dirs):
+                logging.info(f"Ignoring path {or_path} because it contains an ignored directory")
+                return
+            # Create each folder in the destination path, if it does not exist
+            current_path = ""
+            for comp in path_components:
+                current_path = os.path.join(current_path, comp).replace("\\", "/")
+                if not os.path.exists(os.path.join(dir_destination, current_path)):
+                    os.makedirs(os.path.join(dir_destination, current_path))
+                    self.events = dir_destination
+
+        ##########################################################
+
+
         # Replace backslashes with forward slashes in the source path.
         self.event_type = event.event_type
         or_path = event.src_path.replace("\\", "/")
@@ -58,7 +86,7 @@ class MyHandler(FileSystemEventHandler):
         new_route = find_references(or_path, references)
         #print(new_route)
         # #Creates the new destination path
-        dest_file_path = os.path.join(destination,new_route).replace("\\", "/")
+        dest_file_path = os.path.join(dir_destination,new_route).replace("\\", "/")
         #print(dest_file_path)     
         # # Split the new route into a list of path components
         path_components = new_route.split("/")
@@ -75,8 +103,8 @@ class MyHandler(FileSystemEventHandler):
         current_path = ""
         for comp in path_components:
             current_path = os.path.join(current_path, comp).replace("\\", "/")
-            if not os.path.exists(os.path.join(destination, current_path)):
-                os.makedirs(os.path.join(destination, current_path))
+            if not os.path.exists(os.path.join(dir_destination, current_path)):
+                os.makedirs(os.path.join(dir_destination, current_path))
         
 
         # # # # If the file that triggered the event has a valid extension and not an extension that should be include, copy it to the target directory
@@ -104,7 +132,7 @@ class MyHandler(FileSystemEventHandler):
         #print(new_route)
 
         #Creates the new destination path
-        dest_file_path = os.path.join(destination,new_route).replace("\\", "/")
+        dest_file_path = os.path.join(dir_destination,new_route).replace("\\", "/")
         #print(dest_file_path)     
         # Split the new route into a list of path components
         path_components = new_route.split("/")
@@ -116,7 +144,7 @@ class MyHandler(FileSystemEventHandler):
         current_path = ""
         for comp in path_components:
             current_path = os.path.join(current_path, comp).replace("\\", "/")
-            dest_file_path = (os.path.join(destination, current_path)).replace("\\", "/")
+            dest_file_path = (os.path.join(dir_destination, current_path)).replace("\\", "/")
 
         if os.path.exists(dest_file_path) and os.path.isdir(dest_file_path):
                 extension = ('.var', '.fil', '.tdr', '.txt')
@@ -158,7 +186,7 @@ class MyHandler(FileSystemEventHandler):
             return
 
         # #Creates the new destination path
-        dest_file_path_remove = os.path.join(destination,new_route).replace("\\", "/")
+        dest_file_path_remove = os.path.join(dir_destination,new_route).replace("\\", "/")
         print(f"Esta es la dest {dest_file_path_remove}") 
 
         # # If the target file exists, delete it and print a message.
@@ -179,7 +207,7 @@ class MyHandler(FileSystemEventHandler):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO,format="%(levelname)s | %(asctime)s | %(message)s")
 
-    path = os.path.abspath(origin)
+    path = os.path.abspath(dir_origin)
     event_handler = MyHandler()
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)

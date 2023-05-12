@@ -30,13 +30,13 @@ def setup_myhandler():
 # Test Case 1: Create a file
 # Expected Result: File is created on server
 # def test_on_created():
-#     file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/console"
+#     file_route = os.path.join(dir_origin, "server_b/TOS/console").replace("\\", "/")
 
 #     # Set up the observer and handler instances
 #     origin_observer, handler = setup_myhandler()
 
 #     # Create the test file at the file_route path using the open function, write some content to it, and wait for one second to allow the observer to detect the created event
-#     file = os.path.join(file_route, 'test_file_8.txt')
+#     file = os.path.join(file_route, 'test_file_111.txt')
 #     with open(file, 'w') as f:
 #         f.write('Hello, Watchdog!')
 #     time.sleep(1)
@@ -52,13 +52,13 @@ def setup_myhandler():
 # Expected Result: File is modified on server
 # def test_on_modified():
 #     # Set up the observer and handler
-#     file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/console"
+#     file_route = os.path.join(dir_origin, "server_b/TOS/console").replace("\\", "/")
 
 #     # Set up the observer and handler instances
 #     origin_observer, handler = setup_myhandler()
 
 #     # Create the file to be modified
-#     file_path = os.path.join(file_route, 'test_file0_11.txt')
+#     file_path = os.path.join(file_route, 'test_file0_119.txt')
 #     with open(file_path, 'w') as f:
 #         f.write('Hello, Watchdog!\n')
 #         f.write('This is a modified file')
@@ -77,7 +77,7 @@ def setup_myhandler():
 # # Expected Result: File is deleted from server
 # def test_on_deleted():
 #     # Set the directories where the Watchdog observer will listen for events and where the test file will be created
-#     file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/console"
+#     file_route = os.path.join(dir_origin, "server_b/TOS/console").replace("\\", "/")
 
 #     # Set up the observer and handler instances
 #     origin_observer, handler = setup_myhandler()
@@ -100,22 +100,22 @@ def setup_myhandler():
 
 # # Test Case 4: Create a directory
 # # Expected Result: Directory is created on server
-# def test_on_created_dir():
-#     # Set the directories where the Watchdog observer will listen for events and where the test file will be created
-#     dir_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_a/TOS"
+def test_on_created_dir():
+    # Set the directories where the Watchdog observer will listen for events and where the test file will be created
+    dir_route = os.path.join(dir_origin, "server_c/TOS/console").replace("\\", "/")
     
-#     # Set up the observer and handler instances
-#     origin_observer, handler = setup_myhandler()
+    # Set up the observer and handler instances
+    origin_observer, handler = setup_myhandler()
 
-#     # Create the test directory at the dir_route path using os.makedirs() function and wait for one second to allow the observer to detect the created event
-#     test_dir = os.path.join(dir_route, 'test_dir_2')
-#     os.makedirs(test_dir)
-#     origin_observer.join(timeout=1)
+    # Create the test directory at the dir_route path using os.makedirs() function and wait for one second to allow the observer to detect the created event
+    test_dir = os.path.join(dir_route, 'test_dir_21')
+    os.makedirs(test_dir)
+    origin_observer.join(timeout=1)
 
-#     # Stop the observer and check if the directory has been created correctly by checking if the handler.events directory exists
-#     origin_observer.stop()
-#     print(handler.events)
-#     assert os.path.exists(handler.events)
+    # Stop the observer and check if the directory has been created correctly by checking if the handler.events directory exists
+    origin_observer.stop()
+    print(handler.events)
+    assert os.path.exists(handler.events)
 
 
 
@@ -127,8 +127,8 @@ def setup_myhandler():
 # Expected Result: No changes to server
 # def test_on_created_ignored():
 #     # Set the directories where the Watchdog observer will listen for events and where the test file will be created
-#     file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/console"
-#     dest_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/server_b/TOS/console"
+#     file_route = os.path.join(dir_origin, "server_b/TOS/console").replace("\\", "/")
+#     dest_route = os.path.join(dir_destination, "server_b/TOS/console").replace("\\", "/")
 
 #     # Set up the observer and handler instances
 #     origin_observer, handler = setup_myhandler()
@@ -151,8 +151,8 @@ def setup_myhandler():
 # # Expected Result: No changes to server
 # def test_on_modified_ignored():
 #     # Set the directories where the Watchdog observer will listen for events and where the test file will be created
-#     file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/console"
-#     dest_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/server_b/TOS/console"
+#     file_route = os.path.join(dir_origin, "server_b/TOS/console").replace("\\", "/")
+#     dest_route = os.path.join(dir_destination, "server_b/TOS/console").replace("\\", "/")
 
 #     # Set up the observer and handler instances
 #     origin_observer, handler = setup_myhandler()
@@ -185,8 +185,8 @@ def setup_myhandler():
 # # Test Case 8: Delete a file with an extension that should be ignored
 # # Expected Result: No changes to server
 # def test_on_deleted_ignored():
-#     file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/console"
-#     dest_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/server_b/TOS/console"
+#     file_route = os.path.join(dir_origin, "server_b/TOS/console").replace("\\", "/")
+#     dest_route = os.path.join(dir_destination, "server_b/TOS/console").replace("\\", "/")
 
 #     # Set up the observer and handler instances
 #     origin_observer, handler = setup_myhandler()
@@ -210,12 +210,12 @@ def setup_myhandler():
 # Test Case 9: Create a directory that should be ignored
 # Expected Result: No changes to server
 # def test_on_created_ignoredir():
-#     dir_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_a/TOS/bin"
+#     dir_route = os.path.join(dir_origin, "server_c/TOS/bin").replace("\\", "/")
     
 #     # Set up the observer and handler instances
 #     origin_observer, handler = setup_myhandler()
 
-#     file = os.path.join(dir_route, 'test9.txt')
+#     file = os.path.join(dir_route, 'test9.txt').replace("\\", "/")
 #     with open(file, 'w') as f:
 #         f.write('Hello, Watchdog!')
 
@@ -230,13 +230,13 @@ def setup_myhandler():
 # Test Case 10: Delete a directory that should be ignored
 # Expected Result: No changes to server
 # def test_create_and_delete_ignored_file():
-#     dir_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_c/TOS/logs"
+#     dir_route = os.path.join(dir_origin, "server_c/TOS/logs").replace("\\", "/")
 
 #     # Set up the observer and handler instances
 #     origin_observer, handler = setup_myhandler()
 
 #     # Create the test file at the dir_route path using the open function, write some content to it
-#     file = os.path.join(dir_route, 'test_file.txt')
+#     file = os.path.join(dir_route, 'test_file.txt').replace("\\", "/")
 #     with open(file, 'w') as f:
 #         f.write('Test content')
 
@@ -252,7 +252,7 @@ def setup_myhandler():
 # Test Case 11: Create/Modify/Delete a file in a sub-directory
 # Expected Result: File is created/modified/deleted on server in the correct sub-directory
 # def test_on_subdirectory():
-#     file_route = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository/server_b/TOS/Raven/var"
+#     file_route = os.path.join(dir_destination, "server_b/TOS/Raven/var").replace("\\", "/")
 
 #     # Set up the observer and handler instances
 #     origin_observer, handler = setup_myhandler()
@@ -280,30 +280,30 @@ def setup_myhandler():
 
 # Test Case 12: Create/Modify/Delete a file in a directory that should be ignored
 # Expected Result: No changes to server
-def test_on_ignoresubdirectory():
-    file_route = os.path.join(dir_destination, "server_b/TOS/logs").replace("\\", "/")
+# def test_on_ignoresubdirectory():
+#     file_route = os.path.join(dir_destination, "server_b/TOS/logs").replace("\\", "/")
 
-    # Set up the observer and handler instances
-    origin_observer, handler = setup_myhandler()
+#     # Set up the observer and handler instances
+#     origin_observer, handler = setup_myhandler()
 
-    # Create the test file at the file_route path using the open function, write some content to it, and wait for one second to allow the observer to detect the created event
-    file = os.path.join(file_route, 'test_file09.log').replace("\\", "/")
-    with open(file, 'w') as f:
-        f.write('Test content')
-    time.sleep(1)
+#     # Create the test file at the file_route path using the open function, write some content to it, and wait for one second to allow the observer to detect the created event
+#     file = os.path.join(file_route, 'test_file09.log').replace("\\", "/")
+#     with open(file, 'w') as f:
+#         f.write('Test content')
+#     time.sleep(1)
 
-    # Modify the test file by appending some text to it, and wait for one second to allow the observer to detect the modified event
-    with open(file, 'a') as f:
-        f.write(' This is a modification')
-    time.sleep(1)
+#     # Modify the test file by appending some text to it, and wait for one second to allow the observer to detect the modified event
+#     with open(file, 'a') as f:
+#         f.write(' This is a modification')
+#     time.sleep(1)
 
-    # Remove the test file and wait for one second to allow the observer to detect the deleted event
-    os.remove(file)
-    time.sleep(1)
+#     # Remove the test file and wait for one second to allow the observer to detect the deleted event
+#     os.remove(file)
+#     time.sleep(1)
 
-    # Stop the observer and check if the file has been created, modified, and deleted correctly by checking if the handler.events 
-    origin_observer.stop()
-    assert not os.path.exists(handler.events)
+#     # Stop the observer and check if the file has been created, modified, and deleted correctly by checking if the handler.events 
+#     origin_observer.stop()
+#     assert not os.path.exists(handler.events)
 
 
 # Test Case 13: Verify program output and error handling for any error cases
