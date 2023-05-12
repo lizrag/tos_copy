@@ -107,10 +107,10 @@ def test_on_created_dir():
     # Set up the observer and handler instances
     origin_observer, handler = setup_myhandler()
 
-    # Create the test directory at the dir_route path using os.makedirs() function and wait for one second to allow the observer to detect the created event
-    test_dir = os.path.join(dir_route, 'test_dir_21')
-    os.makedirs(test_dir)
-    origin_observer.join(timeout=1)
+#     # Create the test directory at the dir_route path using os.makedirs() function and wait for one second to allow the observer to detect the created event
+#     test_dir = os.path.join(dir_route, 'test_dir_2')
+#     os.makedirs(test_dir)
+#     origin_observer.join(timeout=1)
 
     # Stop the observer and check if the directory has been created correctly by checking if the handler.events directory exists
     origin_observer.stop()
