@@ -20,8 +20,6 @@ dir_destination = os.path.join(dir_path,"folder_sync_project").replace("\\", "/"
 print(dir_destination)
 
 
-# origin = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
-# destination = "C:/Users/laura.rangelroman/Documents/folder_sync_project"
 
 lock = threading.Lock()
 
@@ -39,15 +37,22 @@ def find_references(or_path, references):
     print(f"this is the {new_route}")
     return new_route
 
+def create_directories(path_components, dir_destination):
+    current_path = ""
+    for comp in path_components:
+        current_path = os.path.join(current_path, comp).replace("\\", "/")
+        if not os.path.exists(os.path.join(dir_destination, current_path)):
+            os.makedirs(os.path.join(dir_destination, current_path))
+
 
 class MyHandler(FileSystemEventHandler):
     def __init__(self):
         self.events = ""
         self.event_type = ""
     def on_created(self, event):
-        if event.is_directory:
             self.event_type = event.event_type
             or_path = event.src_path.replace("\\", "/")
+            file_name = os.path.basename(or_path) 
             ignore_dirs = ['logs', 'bin', 'archive']
             references = ['server_a', 'server_b', 'server_c']
             # Look for the first reference in the list of references
@@ -62,60 +67,27 @@ class MyHandler(FileSystemEventHandler):
             if any(dir in or_path for dir in ignore_dirs):
                 logging.info(f"Ignoring path {or_path} because it contains an ignored directory")
                 return
+            if event.is_directory:
+                # Create each folder in the destination path, if it does not exist
+                create_dirs = create_directories(path_components, dir_destination)
+                self.events = dir_destination
+
+            # Remove the last componentonent (the file name) if it contains a dot (".")
+            if "." in path_components[-1]:
+                path_components = path_components[:-1]
             # Create each folder in the destination path, if it does not exist
-            current_path = ""
-            for comp in path_components:
-                current_path = os.path.join(current_path, comp).replace("\\", "/")
-                if not os.path.exists(os.path.join(dir_destination, current_path)):
-                    os.makedirs(os.path.join(dir_destination, current_path))
-                    self.events = dir_destination
-
-        ##########################################################
-
-
-        # Replace backslashes with forward slashes in the source path.
-        self.event_type = event.event_type
-        or_path = event.src_path.replace("\\", "/")
-        file_name = os.path.basename(or_path)   
-        #Ignore certain names of directories
-        ignore_dirs = ['logs', 'bin', 'archive']
-        #check for the references folders
-        references = ['server_a', 'server_b', 'server_c']
-
-        # Look for the first reference in the list of references
-        new_route = find_references(or_path, references)
-        #print(new_route)
-        # #Creates the new destination path
-        dest_file_path = os.path.join(dir_destination,new_route).replace("\\", "/")
-        #print(dest_file_path)     
-        # # Split the new route into a list of path components
-        path_components = new_route.split("/")
-
-        # Check if the path contains an ignored directory
-        if any(dir in or_path for dir in ignore_dirs):
-            logging.info(f"Ignoring path {or_path} because it contains an ignored directory")
-            return
-
-        # # # # Remove the last componentonent (the file name) if it contains a dot (".")
-        if "." in path_components[-1]:
-            path_components = path_components[:-1]
-        # Create each folder in the destination path, if it does not exist
-        current_path = ""
-        for comp in path_components:
-            current_path = os.path.join(current_path, comp).replace("\\", "/")
-            if not os.path.exists(os.path.join(dir_destination, current_path)):
-                os.makedirs(os.path.join(dir_destination, current_path))
+            create_dirs = create_directories(path_components, dir_destination)
         
+            # If the file that triggered the event has a valid extension and not an extension that should be include, copy it to the target directory
+            extension = ('.var', '.fil', '.tdr', '.txt')
+            ignore_extension = ('.log')
+            if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
+                #print(dest_file_path)
+                shutil.copy2(or_path, dest_file_path)
+                logging.info(f"Copied {or_path} to {dest_file_path}")
+                print("copy")
+                self.events = dest_file_path
 
-        # # # # If the file that triggered the event has a valid extension and not an extension that should be include, copy it to the target directory
-        extension = ('.var', '.fil', '.tdr', '.txt')
-        ignore_extension = ('.log')
-        if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
-            #print(dest_file_path)
-            shutil.copy2(or_path, dest_file_path)
-            logging.info(f"Copied {or_path} to {dest_file_path}")
-            print("copy")
-            self.events = dest_file_path
 
 
 
@@ -146,6 +118,7 @@ class MyHandler(FileSystemEventHandler):
             current_path = os.path.join(current_path, comp).replace("\\", "/")
             dest_file_path = (os.path.join(dir_destination, current_path)).replace("\\", "/")
 
+
         if os.path.exists(dest_file_path) and os.path.isdir(dest_file_path):
                 extension = ('.var', '.fil', '.tdr', '.txt')
                 ignore_extension = ('.log')
@@ -158,12 +131,20 @@ class MyHandler(FileSystemEventHandler):
                     except Exception as e:
                         print(f"Error copying file {file_name}: {e}")
                         logging.error(f"Error copying file {file_name}: {e}")
+                elif os.path.isdir(or_path):
+                    if event.is_directory:
+                        try:
+                            os.rmdir(dest_file_path)
+                            print(f"The directory {dest_file_path} has been deleted.")
+                            logging.info(f"Directory deleted: {dest_file_path}")
+                        except Exception as e:
+                            print(f"Error deleting directory {dest_file_path}: {e}")
+                            logging.error(f"Error deleting directory {dest_file_path}: {e}")
+
 
                         
 
     def on_deleted(self, event):
-        # self.event_type = event.event_type
-        # print(self.event_type)
         # Replace backslashes with forward slashes in the source path.
         or_path = event.src_path.replace("\\", "/")
         #print(f"Aqui esta {or_path}")
@@ -190,16 +171,27 @@ class MyHandler(FileSystemEventHandler):
         print(f"Esta es la dest {dest_file_path_remove}") 
 
         # # If the target file exists, delete it and print a message.
-        if(os.path.exists(dest_file_path_remove)):
-            try:
-                os.remove(dest_file_path_remove)
-                print(f"The file {file_name} has been deleted from {dest_file_path_remove}.")
-                logging.info(f"File deleted from {dest_file_path_remove}")
-            except Exception as e:
-                print(f"Error deleting file {file_name}: {e}")
-                logging.error(f"Error deleting file {file_name}: {e}")
+        if os.path.exists(dest_file_path_remove):
+            if os.path.isfile(dest_file_path_remove):
+                try:
+                    os.remove(dest_file_path_remove)
+                    print(f"The file {file_name} has been deleted from {dest_file_path_remove}.")
+                    logging.info(f"File deleted from {dest_file_path_remove}")
+                except Exception as e:
+                    print(f"Error deleting file {file_name}: {e}")
+                    logging.error(f"Error deleting file {file_name}: {e}")
+            elif os.path.isdir(dest_file_path_remove):
+                try:
+                    os.remove(dest_file_path_remove)
+                    print(f"The directory {dest_file_path_remove} has been deleted.")
+                    logging.info(f"Directory deleted: {dest_file_path_remove}")
+                except Exception as e:
+                    print(f"Error deleting directory {dest_file_path_remove}: {e}")
+                    logging.error(f"Error deleting directory {dest_file_path_remove}: {e}")
+
         self.events = dest_file_path_remove
-        print(f"el evento es este {self.events}")
+        print(f"The event is: {self.events}")
+
 
 
 
