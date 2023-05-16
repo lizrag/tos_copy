@@ -1,83 +1,199 @@
-    # def on_created(self, event):
-    #     # Replace backslashes with forward slashes in the source path.
-    #     or_path = event.src_path.replace("\\", "/")
-    #     print(or_path)
-    #     server = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(or_path)))))
-    #     print(server)
-    #     # Extract the server name from the path
-    #     first_dir = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
-    #     print(first_dir)
-    #     # Extract the file name from the path
-    #     file_name = os.path.basename(or_path)
-    #     print(file_name)
-    #     # Extract the TOS dir
-    #     second_dir = os.path.basename(os.path.dirname(os.path.dirname(or_path)))
-    #     print(second_dir)
-    #     # Extract the subdir of TOS
-    #     third_dir = os.path.basename(os.path.dirname(or_path))
-    #     print(third_dir)
-    #     # Create a path to the target destination directory
-    #     dest_file_path = os.path.join(destination,server,first_dir,second_dir,third_dir).replace("\\", "/")
-    #     print(dest_file_path)
-    #     ignore_dirs = ['logs', 'bin', 'archive']
+# import os
+# import logging
+# import time
+# import shutil
+# import threading
+# from watchdog.observers import Observer
+# from watchdog.events import FileSystemEventHandler, LoggingEventHandler
+# from watchdog.events import (
+#     EVENT_TYPE_CREATED,
+#     EVENT_TYPE_DELETED,
+#     EVENT_TYPE_MODIFIED,
+#     EVENT_TYPE_MOVED
+# )
 
-    #     path_components = or_path.split(or_path)
-    #     print(path_components)
-    #     num_components = len([component for component in or_path.split("/") if component])
-    #     print(num_components)
+# dir_path = os.path.dirname(os.path.abspath(__file__))
+# print(dir_path)
+# dir_origin = os.path.join(dir_path,"folder_sync_project/repository").replace("\\", "/")
+# print(dir_origin)
+# dir_destination = os.path.join(dir_path,"folder_sync_project").replace("\\", "/")
+# print(dir_destination)
 
-        # if third_dir in ignore_dirs or second_dir in ignore_dirs:
-        #     logging.info(f"Ignoring directory '{third_dir}' because it's in the ignore list")
-        #     return
+# #origin = "C:/Users/laura.rangelroman/Documents/folder_sync_project/repository"
+# #destination = "C:/Users/laura.rangelroman/Documents/folder_sync_project"
+
+# lock = threading.Lock()
+
+
+# def find_references(or_path, references):
+#     found_ref = False
+#     for ref in references:
+#         if ref in or_path and not found_ref:
+#             index = or_path.index(ref)
+#             # add all the components that comes after the reference
+#             new_route = or_path[index:]
+#             found_ref = True
+#     if not found_ref:
+#         new_route = or_path
+#     print(f"this is the {new_route}")
+#     return new_route
+
+
+# class MyHandler(FileSystemEventHandler):
+#     def __init__(self):
+#         self.events = ""
+#         self.event_type = ""
+#     def on_created(self, event):
+#         # Replace backslashes with forward slashes in the source path.
+#         self.event_type = event.event_type
+#         or_path = event.src_path.replace("\\", "/")
+#         file_name = os.path.basename(or_path)   
+#         #Ignore certain names of directories
+#         ignore_dirs = ['logs', 'bin', 'archive']
+#         #check for the references folders
+#         references = ['server_a', 'server_b', 'server_c']
+
+#         # Look for the first reference in the list of references
+#         new_route = find_references(or_path, references)
+#         #print(new_route)
+#         # #Creates the new destination path
+#         dest_file_path = os.path.join(dir_destination,new_route).replace("\\", "/")
+#         #print(dest_file_path)     
+#         # # Split the new route into a list of path components
+#         path_components = new_route.split("/")
+
+#         # Check if the path contains an ignored directory
+#         if any(dir in or_path for dir in ignore_dirs):
+#             logging.info(f"Ignoring path {or_path} because it contains an ignored directory")
+#             return
+
+#         # # # # Remove the last componentonent (the file name) if it contains a dot (".")
+#         if "." in path_components[-1]:
+#             path_components = path_components[:-1]
+#         # Create each folder in the destination path, if it does not exist
+#         current_path = ""
+#         for comp in path_components:
+#             current_path = os.path.join(current_path, comp).replace("\\", "/")
+#             if not os.path.exists(os.path.join(dir_destination, current_path)):
+#                 os.makedirs(os.path.join(dir_destination, current_path))
         
-        # # Creates the TOS folder if does not exist
-        # subdir_parent_dir = os.path.join(destination, first_dir, second_dir).replace("\\", "/")
-        # if not os.path.exists(subdir_parent_dir):
-        #     os.makedirs(subdir_parent_dir, exist_ok=True)
 
-        # # Creates the subdir folder if it doesn't exist
-        # if not os.path.exists(dest_file_path):
-        #     os.makedirs(dest_file_path, exist_ok=True)
+#         # # # # If the file that triggered the event has a valid extension and not an extension that should be include, copy it to the target directory
+#         extension = ('.var', '.fil', '.tdr', '.txt')
+#         ignore_extension = ('.log')
 
-        # # If the file that triggered the event has a valid extension and not an extension that should be include, copy it to the target directory
-        # extension = ('.var', '.fil', '.tdr', '.txt')
-        # ignore_extension = ('.log')
-        # if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
-        #     shutil.copy2(or_path, os.path.join(dest_file_path, file_name))
-        #     logging.info(f"Copied {or_path} to {dest_file_path}")
-        #     print("copy")
-
-
+#         if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
+#             if os.path.isfile(or_path):
+#                 shutil.copy2(or_path, dest_file_path)
+#                 logging.info(f"Copied file {or_path} to {dest_file_path}")
+#                 print("Copied file")
+#                 self.events = dest_file_path
+#             elif os.path.isdir(or_path):
+#                 shutil.copytree(or_path, dest_file_path)
+#                 logging.info(f"Copied directory {or_path} to {dest_file_path}")
+#                 print("Copied directory")
+#                 self.events = dest_file_path
 
 
-# def on_modified(self, event):
-#     # Only process files, not directories.
-#         if not event.is_directory:
-#             or_path = event.src_path.replace("\\", "/")
-#             # Extract the server name and the file name from the path.
-#             server_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(or_path))))
-#             file_name = os.path.basename(or_path)
-#             print(file_name)
-#             # Create a path to the target directory and replace backslashes with forward slashes
-#             dest_file_path = os.path.join(destination, server_name).replace("\\", "/")
-#             if os.path.exists(dest_file_path) and os.path.isdir(dest_file_path): # verify destination path
+
+
+#     def on_modified(self, event):
+#         # Replace backslashes with forward slashes in the source path.
+#         self.event_type = event.event_type
+#         or_path = event.src_path.replace("\\", "/")
+#         file_name = os.path.basename(or_path)   
+#         #check for the references folders
+#         references = ['server_a', 'server_b', 'server_c']
+
+#         # Look for the first reference in the list of references
+#         new_route = find_references(or_path, references)
+#         #print(new_route)
+
+#         #Creates the new destination path
+#         dest_file_path = os.path.join(dir_destination,new_route).replace("\\", "/")
+#         #print(dest_file_path)     
+#         # Split the new route into a list of path components
+#         path_components = new_route.split("/")
+
+#         # Remove the last componentonent (the file name) if it contains a dot (".")
+#         if "." in path_components[-1]:
+#             path_components = path_components[:-1]
+#         # Create each folder in the destination path, if it does not exist
+#         current_path = ""
+#         for comp in path_components:
+#             current_path = os.path.join(current_path, comp).replace("\\", "/")
+#             dest_file_path = (os.path.join(dir_destination, current_path)).replace("\\", "/")
+
+#         if os.path.exists(dest_file_path) and os.path.isdir(dest_file_path):
 #                 extension = ('.var', '.fil', '.tdr', '.txt')
 #                 ignore_extension = ('.log')
 #                 if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
-#                     # Use a lock to ensure that the file is only updated once
-#                     with lock:
-#                         # If the source file is newer, update the destination file and print a message.
-#                         src_mtime = os.stat(or_path).st_mtime
-#                         dst_file_path = os.path.join(dest_file_path, file_name).replace("\\", "/")
-#                         if os.path.exists(or_path) and os.path.exists(dst_file_path):
-#                             mtime_a = os.stat(or_path).st_mtime
-#                             mtime_b = os.stat(dst_file_path).st_mtime
-#                             if mtime_a > mtime_b:
-#                                 shutil.copy2(or_path, dst_file_path)
-#                                 print(f"The file {or_path} has been updated in {dst_file_path}.")
-#                                 logging.info(f"File updated from {or_path} in {dst_file_path}")
-#                             else:
-#                                 print(f"The file {or_path} has not been updated in {dst_file_path}.")
-#                                 logging.info(f"File not updated from {or_path} in {dst_file_path}")
-#                 else:
-#                     print(f"The destination path {dest_file_path} is invalid.")
+#                     try:
+#                         shutil.copy2(or_path, dest_file_path)
+#                         print(f"The file {file_name} has been updated in {dest_file_path}.")
+#                         logging.info(f"File updated from {or_path} in {current_path}")
+#                         self.events = dest_file_path
+#                     except Exception as e:
+#                         print(f"Error copying file {file_name}: {e}")
+#                         logging.error(f"Error copying file {file_name}: {e}")
+
+                        
+
+#     def on_deleted(self, event):
+#         # self.event_type = event.event_type
+#         # print(self.event_type)
+#         # Replace backslashes with forward slashes in the source path.
+#         or_path = event.src_path.replace("\\", "/")
+#         #print(f"Aqui esta {or_path}")
+#         file_name = os.path.basename(or_path)   
+#         #Ignore certain names of directories
+#         ignore_dirs = ['logs', 'bin', 'archive']
+#         #check for the references folders
+#         references = ['server_a', 'server_b', 'server_c']
+
+#         # # Look for the first reference in the list of references
+#         new_route = find_references(or_path, references)
+#         #print(f"todo la lista {new_route}")
+    
+#         # # Split the new route into a list of path components
+#         path_components = new_route.split("/")    
+
+#         # Check if the path contains an ignored directory
+#         if any(dir in or_path for dir in ignore_dirs):
+#             logging.info(f"Ignoring path {or_path} because it contains an ignored directory")
+#             return
+
+#         # #Creates the new destination path
+#         dest_file_path_remove = os.path.join(dir_destination,new_route).replace("\\", "/")
+#         print(f"Esta es la dest {dest_file_path_remove}") 
+
+#         # # If the target file exists, delete it and print a message.
+#         if(os.path.exists(dest_file_path_remove)):
+#             try:
+#                 os.remove(dest_file_path_remove)
+#                 print(f"The file {file_name} has been deleted from {dest_file_path_remove}.")
+#                 logging.info(f"File deleted from {dest_file_path_remove}")
+#             except Exception as e:
+#                 print(f"Error deleting file {file_name}: {e}")
+#                 logging.error(f"Error deleting file {file_name}: {e}")
+#         self.events = dest_file_path_remove
+#         print(f"el evento es este {self.events}")
+
+
+
+
+# if __name__ == '__main__':
+#     logging.basicConfig(level=logging.INFO,format="%(levelname)s | %(asctime)s | %(message)s")
+
+#     path = os.path.abspath(dir_origin)
+#     event_handler = MyHandler()
+#     observer = Observer()
+#     observer.schedule(event_handler, path, recursive=True)
+#     observer.start()
+
+#     try:
+#         while True:
+#             time.sleep(1)
+#     except KeyboardInterrupt:
+#         observer.stop()
+#         observer.join()

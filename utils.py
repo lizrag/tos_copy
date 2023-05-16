@@ -74,3 +74,23 @@
 #                     elif mtime_b > mtime_a:
 #                         shutil.copy2(path_b, path_a)
 #                         print(f"The file {path_b} has been updated in {path_a}.")
+
+
+
+#   def test_0(self, testing_setup): 
+#         #Define a variable to store the watcher instance
+#         watcher = testing_setup
+#         #Run watcher
+#         watcher.run()
+#         #Access the source directory
+#         src_dir = watcher.src_dir
+#         #Access the destination directory
+#         dst_dir = watcher.dst_dir
+#         #Stop watcher, by this time both directories should be the same
+#         watcher.stop()
+#         #Start checking that every file and sub directory is in both directories
+#         for root, dirs, files in os.walk(src_dir):
+#             for dir in dirs:
+#                 assert os.path.isdir(os.path.join(dst_dir, os.path.relpath(root, src_dir), dir))
+#             for file in files:
+#                 assert os.path.isfile(os.path.join(dst_dir, os.path.relpath(root, src_dir), file))
