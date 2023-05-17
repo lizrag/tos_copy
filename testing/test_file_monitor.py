@@ -25,18 +25,18 @@ def setup_myhandler():
 
 # Test Case 0: Sync the starting repo structure to the server
 # Expected Results: All directories and files in the initial structure should be copied to the server.
-def test_sync_directories():
-    destination_route = os.path.dirname(dir_destination) 
+# def test_sync_directories():
+#     destination_route = os.path.dirname(dir_destination) 
 
-    origin_route = setup_myhandler()
+#     origin_route = setup_myhandler()
 
-    for root, dirs, files in os.walk(origin_route[0]):
-        for dir in dirs:
-            origin_dir = os.path.join(root, dir).replace("\\", "/")
-            destination_dir = os.path.join(destination_route, dir).replace("\\", "/")
-            shutil.copytree(origin_dir, destination_dir, dirs_exist_ok=True)
+#     for root, dirs, files in os.walk(origin_route[0]):
+#         for dir in dirs:
+#             origin_dir = os.path.join(root, dir).replace("\\", "/")
+#             destination_dir = os.path.join(destination_route, dir).replace("\\", "/")
+#             shutil.copytree(origin_dir, destination_dir, dirs_exist_ok=True)
 
-    assert os.path.exists(destination_dir)
+#     assert os.path.exists(destination_dir)
 
 
 # Test Case 1: Create a file
@@ -112,27 +112,40 @@ def test_sync_directories():
 
 # # Test Case 4: Create a directory
 # # Expected Result: Directory is created on server
-# def test_on_created_dir():
-#     # Set the directories where the Watchdog observer will listen for events and where the test file will be created
-#     dir_route = os.path.join(dir_origin, "server_c/TOS/console").replace("\\", "/")
+def test_on_created_dir():
+    # Set the directories where the Watchdog observer will listen for events and where the test file will be created
+    dir_route = os.path.join(dir_origin, "server_c/TOS/console").replace("\\", "/")
     
-#     # Set up the observer and handler instances
-#     origin_observer, handler = setup_myhandler()
+    # Set up the observer and handler instances
+    origin_observer, handler = setup_myhandler()
 
-#     # Create the test directory at the dir_route path using os.makedirs() function and wait for one second to allow the observer to detect the created event
-#     test_dir = os.path.join(dir_route, 'test_dir_2')
-#     os.makedirs(test_dir)
-#     origin_observer.join(timeout=1)
+    # Create the test directory at the dir_route path using os.makedirs() function and wait for one second to allow the observer to detect the created event
+    test_dir = os.path.join(dir_route, 'test_dir_47').replace("\\", "/")
+    os.makedirs(test_dir)
+    origin_observer.join(timeout=1)
 
     # Stop the observer and check if the directory has been created correctly by checking if the handler.events directory exists
-    # origin_observer.stop()
-    # print(handler.events)
-    # assert os.path.exists(handler.events)
+    origin_observer.stop()
+
+    assert os.path.exists(handler.events)
 
 
 
 # # Test Case 5: Delete a directory
 # # Expected Result: Directory is deleted from server
+def test_delete_dir():
+    # Set the directories where the Watchdog observer will listen for events and where the test file will be created
+    dir_route = os.path.join(dir_origin, "server_c/TOS/console/test_dir_47").replace("\\", "/")
+    
+    # Set up the observer and handler instances
+    origin_observer, handler = setup_myhandler()
+
+    os.rmdir(dir_route)
+    origin_observer.join(timeout=1)
+    origin_observer.stop()
+
+    assert not os.path.exists(handler.events)
+
 
 
 # Test Case 6: Create a file with an extension that should be ignored

@@ -112,34 +112,23 @@ class MyHandler(FileSystemEventHandler):
         # Remove the last componentonent (the file name) if it contains a dot (".")
         if "." in path_components[-1]:
             path_components = path_components[:-1]
-        # Create each folder in the destination path, if it does not exist
-        current_path = ""
-        for comp in path_components:
-            current_path = os.path.join(current_path, comp).replace("\\", "/")
-            dest_file_path = (os.path.join(dir_destination, current_path)).replace("\\", "/")
+        
 
-
-        if os.path.exists(dest_file_path) and os.path.isdir(dest_file_path):
+        if os.path.exists(dest_file_path) or os.path.isdir(dest_file_path):
                 extension = ('.var', '.fil', '.tdr', '.txt')
                 ignore_extension = ('.log')
                 if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
                     try:
                         shutil.copy2(or_path, dest_file_path)
                         print(f"The file {file_name} has been updated in {dest_file_path}.")
-                        logging.info(f"File updated from {or_path} in {current_path}")
+                        logging.info(f"File updated from {or_path} in {dest_file_path}")
                         self.events = dest_file_path
                     except Exception as e:
                         print(f"Error copying file {file_name}: {e}")
                         logging.error(f"Error copying file {file_name}: {e}")
-                elif os.path.isdir(or_path):
-                    if event.is_directory:
-                        try:
-                            os.rmdir(dest_file_path)
-                            print(f"The directory {dest_file_path} has been deleted.")
-                            logging.info(f"Directory deleted: {dest_file_path}")
-                        except Exception as e:
-                            print(f"Error deleting directory {dest_file_path}: {e}")
-                            logging.error(f"Error deleting directory {dest_file_path}: {e}")
+        else:
+            create_dirs = create_directories(path_components, dir_destination)
+            shutil.copy2(or_path, dest_file_path)
 
 
                         
@@ -182,7 +171,7 @@ class MyHandler(FileSystemEventHandler):
                     logging.error(f"Error deleting file {file_name}: {e}")
             elif os.path.isdir(dest_file_path_remove):
                 try:
-                    os.remove(dest_file_path_remove)
+                    shutil.rmtree(dest_file_path_remove)
                     print(f"The directory {dest_file_path_remove} has been deleted.")
                     logging.info(f"Directory deleted: {dest_file_path_remove}")
                 except Exception as e:
