@@ -13,7 +13,6 @@ from watchdog.events import (
 )
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
-print(dir_path)
 dir_origin = os.path.join(dir_path,"folder_sync_project/repository").replace("\\", "/")
 print(dir_origin)
 dir_destination = os.path.join(dir_path,"folder_sync_project").replace("\\", "/")
