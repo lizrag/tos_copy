@@ -37,12 +37,21 @@ def find_references(or_path, references):
     print(f"this is the {new_route}")
     return new_route
 
-def create_directories(path_components, dir_destination):
+def create_directories(path_components, dir_destination, ignore_dirs):
     current_path = ""
     for comp in path_components:
         current_path = os.path.join(current_path, comp).replace("\\", "/")
+        if comp in ignore_dirs:
+            logging.info(f"Ignoring path {current_path} because it contains an ignored directory")
+            return False
         if not os.path.exists(os.path.join(dir_destination, current_path)):
             os.makedirs(os.path.join(dir_destination, current_path))
+        elif not os.path.isdir(os.path.join(dir_destination, current_path)):
+            logging.info(f"Ignoring path {current_path} because it conflicts with an existing file")
+            return False
+    return True
+
+
 
 
 class MyHandler(FileSystemEventHandler):
@@ -50,42 +59,36 @@ class MyHandler(FileSystemEventHandler):
         self.events = ""
         self.event_type = ""
     def on_created(self, event):
-            self.event_type = event.event_type
-            or_path = event.src_path.replace("\\", "/")
-            file_name = os.path.basename(or_path) 
-            ignore_dirs = ['logs', 'bin', 'archive']
-            references = ['server_a', 'server_b', 'server_c']
-            # Look for the first reference in the list of references
-            new_route = find_references(or_path, references)
-            #print(new_route)
-            # #Creates the new destination path
-            dest_file_path = os.path.join(dir_destination, new_route).replace("\\", "/")
-            #print(dest_file_path)     
-            # # Split the new route into a list of path components
-            path_components = new_route.split("/")
-            # Check if the path contains an ignored directory
-            if any(dir in or_path for dir in ignore_dirs):
-                logging.info(f"Ignoring path {or_path} because it contains an ignored directory")
-                return
-            if event.is_directory:
-                # Create each folder in the destination path, if it does not exist
-                create_dirs = create_directories(path_components, dir_destination)
-                self.events = dir_destination
-
-            # Remove the last componentonent (the file name) if it contains a dot (".")
-            if "." in path_components[-1]:
-                path_components = path_components[:-1]
-            # Create each folder in the destination path, if it does not exist
-            create_dirs = create_directories(path_components, dir_destination)
+        self.event_type = event.event_type
+        or_path = event.src_path.replace("\\", "/")
+        file_name = os.path.basename(or_path)
+        ignore_dirs = ['logs', 'bin', 'archive']
+        references = ['server_a', 'server_b', 'server_c']
         
-            # If the file that triggered the event has a valid extension and not an extension that should be include, copy it to the target directory
-            extension = ('.var', '.fil', '.tdr', '.txt')
-            ignore_extension = ('.log')
-            if file_name.endswith(extension) and not file_name.endswith(ignore_extension):
-                #print(dest_file_path)
+        # Look for the first reference in the list of references
+        new_route = find_references(or_path, references)
+        dest_file_path = os.path.join(dir_destination, new_route).replace("\\", "/")
+        path_components = new_route.split("/")
+        
+        # Check if any directory component is in the ignore_dirs list
+        if any(dir in path_components for dir in ignore_dirs):
+            logging.info(f"Ignoring path {or_path} because it contains an ignored directory")
+            return
+        
+        # # # # Remove the last componentonent (the file name) if it contains a dot (".")
+        if "." in path_components[-1]:
+            path_components = path_components[:-1]
+        
+        # Create directories if they don't exist
+        create_dirs = create_directories(path_components, dir_destination, ignore_dirs)
+
+        # Copy the file to the destination if it has a valid extension and is not a .log file
+        valid_extensions = ('.var', '.fil', '.tdr', '.txt')
+        ignore_extensions = ('.log')
+        if file_name.endswith(valid_extensions) and not file_name.endswith(ignore_extensions):
+            if os.path.exists(os.path.dirname(dest_file_path)):
                 shutil.copy2(or_path, dest_file_path)
                 logging.info(f"Copied {or_path} to {dest_file_path}")
-                print("copy")
                 self.events = dest_file_path
 
 
@@ -98,6 +101,7 @@ class MyHandler(FileSystemEventHandler):
         file_name = os.path.basename(or_path)   
         #check for the references folders
         references = ['server_a', 'server_b', 'server_c']
+        ignore_dirs = ['logs', 'bin', 'archive']
 
         # Look for the first reference in the list of references
         new_route = find_references(or_path, references)
@@ -127,7 +131,7 @@ class MyHandler(FileSystemEventHandler):
                         print(f"Error copying file {file_name}: {e}")
                         logging.error(f"Error copying file {file_name}: {e}")
         else:
-            create_dirs = create_directories(path_components, dir_destination)
+            create_dirs = create_directories(path_components, dir_destination, ignore_dirs)
             shutil.copy2(or_path, dest_file_path)
 
 
