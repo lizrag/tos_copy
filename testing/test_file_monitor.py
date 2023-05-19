@@ -251,6 +251,8 @@ def test_on_deleted_ignored():
 def test_on_created_ignoredir():
     dir_route = os.path.join(dir_origin, "server_c/TOS/bin").replace("\\", "/")
     
+    # Create the directory if it doesn't exist
+    os.makedirs(dir_route, exist_ok=True)
     # Set up the observer and handler instances
     origin_observer, handler = setup_myhandler()
 
