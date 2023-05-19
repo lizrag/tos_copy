@@ -129,9 +129,9 @@ class MyHandler(FileSystemEventHandler):
                     except Exception as e:
                         print(f"Error copying file {file_name}: {e}")
                         logging.error(f"Error copying file {file_name}: {e}")
-        else:
-            create_dirs = create_directories(path_components, dir_destination, ignore_dirs)
-            shutil.copy2(or_path, dest_file_path)
+        # else:
+        #     create_dirs = create_directories(path_components, dir_destination, ignore_dirs)
+        #     shutil.copy2(or_path, dest_file_path)
 
 
                         

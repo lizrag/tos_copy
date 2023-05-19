@@ -204,9 +204,6 @@ def test_on_modified_ignored():
     with open(file, 'w') as f:
         f.write('Test content')
 
-    # Wait for one second to allow the observer to detect the created event
-    time.sleep(1)
-
     # Modify the test file by appending some more content to it, and wait for one second to allow the observer to detect the modified event
     with open(file, 'a') as f:
         f.write('This is a modified file')
@@ -217,13 +214,10 @@ def test_on_modified_ignored():
 
     # Check that the file was not copied to dest_route
     file_dest = os.path.join(dest_route, 'test_file2.log')
-    assert not os.path.exists(file_dest)
+    assert os.path.exists(file_dest) == False
 
     # Check that the handler received a "modified" event
     assert handler.event_type == 'modified'
-
-
-
 
 
 
@@ -265,11 +259,11 @@ def test_on_created_ignoredir():
         f.write('Hello, Watchdog!')
 
     origin_observer.join(timeout=1)
+    time.sleep(1) 
 
     # Stop the observer and check if the directory has ignored correctly by checking if the handler.events directory exists
     origin_observer.stop()
     origin_observer.join(timeout=1)
-    time.sleep(1)  
 
     assert not os.path.exists(handler.events)
     os.remove(file)
